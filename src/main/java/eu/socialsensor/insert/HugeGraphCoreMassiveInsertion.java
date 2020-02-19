@@ -90,6 +90,7 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer> {
 
         this.pool.submit(() -> {
             for (Integer v : vertices) {
+                //TODO:  未写properties 与单例模式不同
                 this.graph.addVertex(T.id, v, T.label, HugeGraphDatabase.NODE);
             }
             HugeVertex source;

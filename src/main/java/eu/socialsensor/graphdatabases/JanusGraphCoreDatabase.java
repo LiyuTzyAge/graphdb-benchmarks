@@ -1,13 +1,9 @@
 package eu.socialsensor.graphdatabases;
 
-import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
-import com.tinkerpop.pipes.branch.LoopPipe;
 import eu.socialsensor.insert.JanusGraphCoreMassiveInsertion;
 import eu.socialsensor.insert.JanusGraphCoreSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.utils.JanusGraphUtils;
-import eu.socialsensor.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
@@ -18,8 +14,10 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import eu.socialsensor.main.GraphDatabaseType;
 import org.apache.tinkerpop.gremlin.structure.util.CloseableIterator;
-import org.janusgraph.core.JanusGraph;
-import org.janusgraph.core.JanusGraphTransaction;
+import org.janusgraph.core.*;
+import org.janusgraph.core.schema.JanusGraphManagement;
+import org.janusgraph.core.util.JanusGraphCleanup;
+import org.janusgraph.diskstorage.BackendException;
 
 import java.io.File;
 import java.util.*;
@@ -45,8 +43,9 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     private volatile JanusGraphTransaction transaction = null;
     private static int counter = 0;
     private static final int BATCH_SIZE = 500;
+    public static final String NODE = "node";
 
-    protected JanusGraphCoreDatabase(BenchmarkConfiguration config, File dbStorageDirectory)
+    public JanusGraphCoreDatabase(BenchmarkConfiguration config, File dbStorageDirectory)
     {
         super(GraphDatabaseType.JANUSGRAPH_CORE, dbStorageDirectory);
         conf = config.getJanusgraphConf();
@@ -74,7 +73,8 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     public Vertex getVertex(Integer i)
     {
         //通过id查询，需要测试验证 //TODO : 待验证
-        return graph.vertices(i).next();
+//        return graph.vertices(i).next();
+        return JanusGraphUtils.getVertex(this.graph, i.longValue());
         //通过索引查询
 //        return graph.traversal().V().has(NODE_ID, i).next();
     }
@@ -135,11 +135,12 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
 
     /**
      * 创建普通图，用于查询测试
+     *    FN, FA, FS and CW
      */
     @Override
     public void open()
     {
-        open(false);
+        buildGraphEnv(false,false);
     }
 
     private void open(boolean batch)
@@ -148,7 +149,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         createTransaction(batch);
     }
 
-    public void createTransaction(boolean batch) {
+    private void createTransaction(boolean batch) {
         if (transaction == null) {
             if (batch) {
                 //批量模式
@@ -164,7 +165,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     @Override
     public void createGraphForSingleLoad()
     {
-        open();
+        buildGraphEnv(false,true);
     }
 
     @Override
@@ -184,33 +185,39 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     @Override
     public void createGraphForMassiveLoad()
     {
-        open(true);
+        buildGraphEnv(true,true);
     }
 
     @Override
     public void shutdown()
     {
         //参照hugegraph
-//        if (this.graph == null) {
-//            return;
-//        }
-//        this.graph.close();
+        if (this.graph == null) {
+            return;
+        }
+        close();
     }
 
     @Override
     public void delete()
     {
-        Utils.deleteRecursively(dbStorageDirectory);
+//        open();
+//        try {
+//            JanusGraphFactory.drop(graph);
+//        } catch (BackendException e) {
+//            LOG.warn("##janusgraph drop faild ", e.getMessage());
+//        }
+//        Utils.deleteRecursively(dbStorageDirectory);
     }
 
     @Override
     public void shutdownMassiveGraph()
     {
         //参照hugegraph
-//        if (this.graph == null) {
-//            return;
-//        }
-//        this.graph.close();
+        if (this.graph == null) {
+            return;
+        }
+        close();
     }
 
     @Override
@@ -327,7 +334,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     {
         // NOTE: this method won't be called due to Cache
         long edges = 0L;
-        Set<Integer> commVertices = this.g.V().has(COMMUNITY, communityNodes).values(NODE_ID).toStream().map(id->(Integer)id).collect(Collectors.toSet());
+        Set<Integer> commVertices = this.g.V().has(COMMUNITY, communityNodes).values(NODE_ID).toStream().map(id->((Number)id).intValue()).collect(Collectors.toSet());
         Iterator<Vertex> vertices = this.g.V().has(NODE_COMMUNITY,
                 nodeCommunity);
         while (vertices.hasNext()) {
@@ -421,7 +428,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     public int getCommunityFromNode(int nodeId)
     {
         //TODO:待验证
-        Vertex vertex = this.graph.vertices(nodeId).next();
+        Vertex vertex = JanusGraphUtils.getVertex(this.graph,(long) nodeId);
         return vertex.value(COMMUNITY);
     }
 
@@ -443,9 +450,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         while (vertices.hasNext()) {
             Vertex v = vertices.next();
             int nodeCommunity = v.value(NODE_COMMUNITY);
-            if (!nodeCommunities.contains(nodeCommunity)) {
-                nodeCommunities.add(nodeCommunity);
-            }
+            nodeCommunities.add(nodeCommunity);
         }
         return nodeCommunities.size();
     }
@@ -471,30 +476,70 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         //TODO:待验证
         return this.graph.vertices(nodeId).hasNext();
     }
-///////////////////////待续
-//    private void createSchema()
-//    {
-//        final TitanManagement mgmt = g.getManagementSystem();
-//        if (!titanGraph.getIndexedKeys(Vertex.class).contains(NODE_ID))
-//        {
-//            final PropertyKey key = mgmt.makePropertyKey(NODE_ID).dataType(Integer.class).make();
-//            mgmt.buildIndex(NODE_ID, Vertex.class).addKey(key).unique().buildCompositeIndex();
-//        }
-//        if (!titanGraph.getIndexedKeys(Vertex.class).contains(COMMUNITY))
-//        {
-//            final PropertyKey key = mgmt.makePropertyKey(COMMUNITY).dataType(Integer.class).make();
-//            mgmt.buildIndex(COMMUNITY, Vertex.class).addKey(key).buildCompositeIndex();
-//        }
-//        if (!titanGraph.getIndexedKeys(Vertex.class).contains(NODE_COMMUNITY))
-//        {
-//            final PropertyKey key = mgmt.makePropertyKey(NODE_COMMUNITY).dataType(Integer.class).make();
-//            mgmt.buildIndex(NODE_COMMUNITY, Vertex.class).addKey(key).buildCompositeIndex();
-//        }
-//
-//        if (mgmt.getEdgeLabel(SIMILAR) == null)
-//        {
-//            mgmt.makeEdgeLabel(SIMILAR).multiplicity(Multiplicity.MULTI).directed().make();
-//        }
-//        mgmt.commit();
-//    }
+
+    private void clear(boolean clear)
+    {
+        if (clear && graph != null) {
+            try {
+                JanusGraphUtils.dropGraph(this.graph);
+            } catch (BackendException e) {
+                LOG.warn("##janusgraph drop faild ", e.getMessage());
+            }
+        }
+    }
+
+    private void buildGraphEnv(boolean batch,boolean clear)
+    {
+        open(true);
+        clear(clear);
+        graph.tx().rollback();
+        //create schema
+        JanusGraphManagement mgmt = graph.openManagement();
+        VertexLabel vertexLabel = null;
+        EdgeLabel edgeLabel = null;
+
+        if (!mgmt.containsVertexLabel(NODE)) {
+            vertexLabel = mgmt.makeVertexLabel(NODE).make();
+        }
+        if (!mgmt.containsEdgeLabel(SIMILAR)) {
+            edgeLabel = mgmt.makeEdgeLabel(SIMILAR).multiplicity(Multiplicity.MULTI).make();
+        }
+        PropertyKey nodeid = getOrCreatePropertyKey(mgmt, NODE_ID, Integer.class, Cardinality.SINGLE);
+        buildVertexCompositeIndex(mgmt, NODE_ID, true, vertexLabel, nodeid);
+        PropertyKey community = getOrCreatePropertyKey(mgmt, COMMUNITY, Integer.class, Cardinality.SINGLE);
+        buildVertexCompositeIndex(mgmt, COMMUNITY, false, vertexLabel, community);
+        PropertyKey node_community = getOrCreatePropertyKey(mgmt, NODE_COMMUNITY, Integer.class, Cardinality.SINGLE);
+        buildVertexCompositeIndex(mgmt, NODE_COMMUNITY, false, vertexLabel, node_community);
+        mgmt.commit();
+    }
+
+    private static PropertyKey getOrCreatePropertyKey(JanusGraphManagement mgmt, String name, Class<?> clz, Cardinality car) {
+        PropertyKey key = mgmt.getPropertyKey(name);
+        if (key != null) {
+            return key;
+        }
+        return mgmt.makePropertyKey(name).dataType(clz).cardinality(car).make();
+    }
+
+    private static void buildVertexCompositeIndex(JanusGraphManagement mgmt, String indexName, boolean isUniq, VertexLabel label, PropertyKey... keys) {
+        if (mgmt.containsGraphIndex(indexName)) {
+            LOG.warn(indexName + " already exists");
+            return;
+        }
+        JanusGraphManagement.IndexBuilder builder = mgmt.buildIndex(indexName, Vertex.class);
+        if (isUniq) {
+            builder  = builder.unique();
+        }
+        for (PropertyKey k : keys) {
+            builder = builder.addKey(k);
+        }
+        if (label != null) {
+            builder = builder.indexOnly(label);
+        }
+        builder.buildCompositeIndex();
+    }
+    public void close(){
+        if (transaction != null) transaction.close();
+        if(graph != null) graph.close();
+    }
 }

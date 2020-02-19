@@ -1,0 +1,359 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for eu.socialsensor:graphdb-benchmarks:jar:1.10.0
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.carrotsearch:hppc:jar -> version 0.7.1 vs 0.4.2 @ line 215, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Building graphdb-benchmarks 1.10.0
+[INFO] ------------------------------------------------------------------------
+[WARNING] Could not transfer metadata com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from/to maven-s3-release-repo (s3://dynamodblocal/release): Cannot access s3://dynamodblocal/release with type default using the available connector factories: BasicRepositoryConnectorFactory
+[WARNING] Could not transfer metadata com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from/to maven-s3-snapshot-repo (s3://dynamodblocal/snapshot): Cannot access s3://dynamodblocal/snapshot with type default using the available connector factories: BasicRepositoryConnectorFactory
+[WARNING] Failure to transfer com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from s3://dynamodblocal/release was cached in the local repository, resolution will not be reattempted until the update interval of maven-s3-release-repo has elapsed or updates are forced. Original error: Could not transfer metadata com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from/to maven-s3-release-repo (s3://dynamodblocal/release): Cannot access s3://dynamodblocal/release with type default using the available connector factories: BasicRepositoryConnectorFactory
+[WARNING] Failure to transfer com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from s3://dynamodblocal/snapshot was cached in the local repository, resolution will not be reattempted until the update interval of maven-s3-snapshot-repo has elapsed or updates are forced. Original error: Could not transfer metadata com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from/to maven-s3-snapshot-repo (s3://dynamodblocal/snapshot): Cannot access s3://dynamodblocal/snapshot with type default using the available connector factories: BasicRepositoryConnectorFactory
+[WARNING] Failure to transfer com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from s3://dynamodblocal/release was cached in the local repository, resolution will not be reattempted until the update interval of maven-s3-release-repo has elapsed or updates are forced. Original error: Could not transfer metadata com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from/to maven-s3-release-repo (s3://dynamodblocal/release): Cannot access s3://dynamodblocal/release with type default using the available connector factories: BasicRepositoryConnectorFactory
+[WARNING] Failure to transfer com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from s3://dynamodblocal/snapshot was cached in the local repository, resolution will not be reattempted until the update interval of maven-s3-snapshot-repo has elapsed or updates are forced. Original error: Could not transfer metadata com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from/to maven-s3-snapshot-repo (s3://dynamodblocal/snapshot): Cannot access s3://dynamodblocal/snapshot with type default using the available connector factories: BasicRepositoryConnectorFactory
+[WARNING] Could not transfer metadata com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from/to maven-s3-release-repo (s3://dynamodb-local/release): Cannot access s3://dynamodb-local/release with type default using the available connector factories: BasicRepositoryConnectorFactory
+[WARNING] Could not transfer metadata com.amazonaws:aws-java-sdk-dynamodb/maven-metadata.xml from/to maven-s3-snapshot-repo (s3://dynamodb-local/snapshot): Cannot access s3://dynamodb-local/snapshot with type default using the available connector factories: BasicRepositoryConnectorFactory
+[INFO] 
+[INFO] --- maven-dependency-plugin:2.2:tree (default-cli) @ graphdb-benchmarks ---
+[INFO] artifact com.amazonaws:aws-java-sdk-dynamodb: checking for updates from nexus-aliyun
+[INFO] artifact com.amazonaws:aws-java-sdk-dynamodb: checking for updates from alimaven
+[INFO] artifact com.amazonaws:aws-java-sdk-dynamodb: checking for updates from dynamodblocal
+[INFO] artifact com.amazonaws:DynamoDBLocal: checking for updates from nexus-aliyun
+[INFO] artifact com.amazonaws:DynamoDBLocal: checking for updates from alimaven
+[INFO] artifact com.amazonaws:DynamoDBLocal: checking for updates from dynamodblocal
+[INFO] eu.socialsensor:graphdb-benchmarks:jar:1.10.0
+[INFO] +- com.carrotsearch:hppc:jar:0.4.2:compile
+[INFO] +- com.carrotsearch:junit-benchmarks:jar:0.7.0:compile
+[INFO] +- com.carrotsearch.randomizedtesting:randomizedtesting-runner:jar:2.7.2:compile
+[INFO] +- org.janusgraph:janusgraph-core:jar:0.4.0:compile
+[INFO] |  +- org.apache.tinkerpop:gremlin-core:jar:3.4.1:compile
+[INFO] |  |  +- org.apache.tinkerpop:gremlin-shaded:jar:3.4.1:compile
+[INFO] |  |  +- org.yaml:snakeyaml:jar:1.15:compile
+[INFO] |  |  +- org.javatuples:javatuples:jar:1.2:compile
+[INFO] |  |  +- com.jcabi:jcabi-manifests:jar:1.1:compile
+[INFO] |  |  |  \- com.jcabi:jcabi-log:jar:0.14:compile
+[INFO] |  |  +- com.squareup:javapoet:jar:1.8.0:compile
+[INFO] |  |  +- net.objecthunter:exp4j:jar:0.4.8:compile
+[INFO] |  |  \- org.slf4j:jcl-over-slf4j:jar:1.7.25:compile
+[INFO] |  +- org.apache.tinkerpop:gremlin-groovy:jar:3.4.1:compile
+[INFO] |  |  +- org.codehaus.groovy:groovy:jar:indy:2.5.6:compile
+[INFO] |  |  +- org.codehaus.groovy:groovy-groovysh:jar:indy:2.5.6:compile
+[INFO] |  |  |  +- org.codehaus.groovy:groovy-cli-picocli:jar:2.5.6:compile
+[INFO] |  |  |  |  \- info.picocli:picocli:jar:3.9.2:compile
+[INFO] |  |  |  \- org.codehaus.groovy:groovy-console:jar:2.5.6:compile
+[INFO] |  |  |     +- org.codehaus.groovy:groovy-swing:jar:2.5.6:compile
+[INFO] |  |  |     \- org.codehaus.groovy:groovy-templates:jar:2.5.6:compile
+[INFO] |  |  |        \- org.codehaus.groovy:groovy-xml:jar:2.5.6:compile
+[INFO] |  |  +- org.codehaus.groovy:groovy-json:jar:indy:2.5.6:compile
+[INFO] |  |  +- org.codehaus.groovy:groovy-jsr223:jar:indy:2.5.6:compile
+[INFO] |  |  +- org.mindrot:jbcrypt:jar:0.4:compile
+[INFO] |  |  \- com.github.ben-manes.caffeine:caffeine:jar:2.3.1:compile
+[INFO] |  +- org.apache.tinkerpop:tinkergraph-gremlin:jar:3.4.1:compile
+[INFO] |  +- org.glassfish:javax.json:jar:1.0:compile
+[INFO] |  +- io.dropwizard.metrics:metrics-core:jar:3.2.2:compile
+[INFO] |  +- io.dropwizard.metrics:metrics-ganglia:jar:3.2.2:compile
+[INFO] |  |  \- info.ganglia.gmetric4j:gmetric4j:jar:1.0.7:compile
+[INFO] |  +- io.dropwizard.metrics:metrics-graphite:jar:3.2.2:compile
+[INFO] |  +- org.reflections:reflections:jar:0.9.9-RC1:compile
+[INFO] |  |  +- org.javassist:javassist:jar:3.16.1-GA:compile
+[INFO] |  |  \- dom4j:dom4j:jar:1.6.1:compile
+[INFO] |  |     \- xml-apis:xml-apis:jar:1.0.b2:compile
+[INFO] |  +- org.locationtech.spatial4j:spatial4j:jar:0.7:compile
+[INFO] |  +- org.locationtech.jts:jts-core:jar:1.15.0:compile
+[INFO] |  +- commons-collections:commons-collections:jar:3.2.2:compile
+[INFO] |  +- commons-io:commons-io:jar:2.3:compile
+[INFO] |  +- com.google.code.findbugs:jsr305:jar:3.0.0:compile
+[INFO] |  +- org.noggit:noggit:jar:0.6:compile
+[INFO] |  \- org.apache.commons:commons-text:jar:1.0:compile
+[INFO] +- org.janusgraph:janusgraph-cassandra:jar:0.4.0:compile
+[INFO] |  +- io.dropwizard.metrics:metrics-jvm:jar:3.2.2:compile
+[INFO] |  +- ch.qos.logback:logback-classic:jar:1.1.3:compile
+[INFO] |  |  \- ch.qos.logback:logback-core:jar:1.1.3:compile
+[INFO] |  +- org.apache.cassandra:cassandra-all:jar:2.2.13:compile
+[INFO] |  |  +- commons-cli:commons-cli:jar:1.1:compile
+[INFO] |  |  +- org.antlr:antlr:jar:3.5.2:compile
+[INFO] |  |  |  \- org.antlr:ST4:jar:4.0.8:compile
+[INFO] |  |  +- org.codehaus.jackson:jackson-core-asl:jar:1.9.2:compile
+[INFO] |  |  +- com.googlecode.json-simple:json-simple:jar:1.1:compile
+[INFO] |  |  +- com.boundary:high-scale-lib:jar:1.0.6:compile
+[INFO] |  |  +- com.addthis.metrics:reporter-config3:jar:3.0.0:compile
+[INFO] |  |  |  +- com.addthis.metrics:reporter-config-base:jar:3.0.0:compile
+[INFO] |  |  |  \- org.hibernate:hibernate-validator:jar:4.3.0.Final:compile
+[INFO] |  |  |     \- org.jboss.logging:jboss-logging:jar:3.1.0.CR2:compile
+[INFO] |  |  +- com.thinkaurelius.thrift:thrift-server:jar:0.3.7:compile
+[INFO] |  |  |  \- com.lmax:disruptor:jar:3.0.1:compile
+[INFO] |  |  +- com.clearspring.analytics:stream:jar:2.5.2:compile
+[INFO] |  |  |  \- it.unimi.dsi:fastutil:jar:6.5.7:compile
+[INFO] |  |  +- net.sf.supercsv:super-csv:jar:2.1.0:compile
+[INFO] |  |  +- org.apache.thrift:libthrift:jar:0.9.2:compile
+[INFO] |  |  |  \- org.apache.httpcomponents:httpcore:jar:4.3.3:compile
+[INFO] |  |  +- org.apache.cassandra:cassandra-thrift:jar:2.2.13:compile
+[INFO] |  |  +- com.github.jbellis:jamm:jar:0.3.0:compile
+[INFO] |  |  +- com.github.tjake:crc32ex:jar:0.1.1:compile
+[INFO] |  |  +- joda-time:joda-time:jar:2.8.1:compile (version managed from 2.4)
+[INFO] |  |  +- org.fusesource:sigar:jar:1.6.4:compile
+[INFO] |  |  +- org.eclipse.jdt.core.compiler:ecj:jar:4.4.2:compile
+[INFO] |  |  \- org.caffinitas.ohc:ohc-core:jar:0.3.4:compile
+[INFO] |  +- commons-pool:commons-pool:jar:1.6:compile
+[INFO] |  +- com.netflix.astyanax:astyanax-core:jar:3.10.2:compile
+[INFO] |  |  \- com.eaio.uuid:uuid:jar:3.2:compile
+[INFO] |  +- com.netflix.astyanax:astyanax-thrift:jar:3.10.2:compile
+[INFO] |  +- com.netflix.astyanax:astyanax-cassandra:jar:3.10.2:compile
+[INFO] |  |  +- com.netflix.astyanax:astyanax-cassandra-all-shaded:jar:3.10.2:compile
+[INFO] |  |  +- org.apache.servicemix.bundles:org.apache.servicemix.bundles.commons-csv:jar:1.0-r706900_3:compile
+[INFO] |  |  \- org.codehaus.jettison:jettison:jar:1.3.8:compile
+[INFO] |  |     \- stax:stax-api:jar:1.0.1:compile
+[INFO] |  +- com.netflix.astyanax:astyanax-recipes:jar:3.10.2:compile
+[INFO] |  +- org.xerial.snappy:snappy-java:jar:1.0.5-M3:compile
+[INFO] |  +- javax.validation:validation-api:jar:1.1.0.Final:compile
+[INFO] |  \- net.jpountz.lz4:lz4:jar:1.3.0:compile
+[INFO] +- org.janusgraph:janusgraph-cql:jar:0.4.0:compile
+[INFO] |  +- com.datastax.cassandra:cassandra-driver-core:jar:3.7.1:compile
+[INFO] |  |  +- com.github.jnr:jnr-ffi:jar:2.1.7:compile
+[INFO] |  |  |  +- com.github.jnr:jffi:jar:1.2.16:compile
+[INFO] |  |  |  +- com.github.jnr:jffi:jar:native:1.2.16:runtime
+[INFO] |  |  |  +- org.ow2.asm:asm:jar:5.0.3:compile
+[INFO] |  |  |  +- org.ow2.asm:asm-commons:jar:5.0.3:compile
+[INFO] |  |  |  +- org.ow2.asm:asm-analysis:jar:5.0.3:compile
+[INFO] |  |  |  +- org.ow2.asm:asm-tree:jar:5.0.3:compile
+[INFO] |  |  |  +- org.ow2.asm:asm-util:jar:5.0.3:compile
+[INFO] |  |  |  \- com.github.jnr:jnr-x86asm:jar:1.0.2:compile
+[INFO] |  |  \- com.github.jnr:jnr-posix:jar:3.0.44:compile
+[INFO] |  |     \- com.github.jnr:jnr-constants:jar:0.9.9:compile
+[INFO] |  +- io.netty:netty-handler:jar:4.1.25.Final:compile
+[INFO] |  |  +- io.netty:netty-buffer:jar:4.1.25.Final:compile
+[INFO] |  |  |  \- io.netty:netty-common:jar:4.1.25.Final:compile
+[INFO] |  |  +- io.netty:netty-transport:jar:4.1.25.Final:compile
+[INFO] |  |  |  \- io.netty:netty-resolver:jar:4.1.25.Final:compile
+[INFO] |  |  \- io.netty:netty-codec:jar:4.1.25.Final:compile
+[INFO] |  \- io.vavr:vavr:jar:0.9.0:compile
+[INFO] |     \- io.vavr:vavr-match:jar:0.9.0:compile
+[INFO] +- org.janusgraph:janusgraph-berkeleyje:jar:0.4.0:compile
+[INFO] +- com.baidu.hugegraph:hugegraph-dist:jar:0.10.4:compile
+[INFO] +- com.baidu.hugegraph:hugegraph-api:jar:0.10.4:compile
+[INFO] |  +- com.baidu.hugegraph:hugegraph-core:jar:0.10.4:compile
+[INFO] |  |  +- com.baidu.hugegraph:hugegraph-common:jar:1.6.16:compile
+[INFO] |  |  |  +- org.apache.commons:commons-configuration2:jar:2.1.1:compile
+[INFO] |  |  |  +- org.glassfish.jersey.connectors:jersey-apache-connector:jar:2.22:compile
+[INFO] |  |  |  +- org.glassfish.jersey.inject:jersey-hk2:jar:2.27:compile
+[INFO] |  |  |  \- de.schlichtherle.truelicense:truelicense-core:jar:1.33:compile
+[INFO] |  |  |     \- de.schlichtherle.truelicense:truelicense-xml:jar:1.33:compile
+[INFO] |  |  +- org.apache.tinkerpop:gremlin-test:jar:3.4.3:compile
+[INFO] |  |  |  \- org.hamcrest:hamcrest-all:jar:1.3:compile
+[INFO] |  |  +- org.apache.tinkerpop:gremlin-driver:jar:3.4.3:compile
+[INFO] |  |  +- org.apdplat:word:jar:1.3:compile
+[INFO] |  |  |  +- org.apache.lucene:lucene-queryparser:jar:5.2.1:compile
+[INFO] |  |  |  |  +- org.apache.lucene:lucene-queries:jar:5.2.1:compile
+[INFO] |  |  |  |  \- org.apache.lucene:lucene-sandbox:jar:5.2.1:compile
+[INFO] |  |  |  +- org.apache.lucene:lucene-analyzers-common:jar:5.2.1:compile
+[INFO] |  |  |  +- org.apache.lucene:lucene-backward-codecs:jar:5.2.1:compile
+[INFO] |  |  |  +- org.apache.lucene:lucene-suggest:jar:5.2.1:compile
+[INFO] |  |  |  |  \- org.apache.lucene:lucene-misc:jar:5.2.1:compile
+[INFO] |  |  |  +- redis.clients:jedis:jar:2.5.1:compile
+[INFO] |  |  |  |  \- org.apache.commons:commons-pool2:jar:2.0:compile
+[INFO] |  |  |  \- com.belerweb:pinyin4j:jar:2.5.0:compile
+[INFO] |  |  +- org.ansj:ansj_seg:jar:5.1.6:compile
+[INFO] |  |  |  \- org.nlpcn:nlp-lang:jar:1.7.7:compile
+[INFO] |  |  +- com.hankcs:hanlp:jar:portable-1.5.0:compile
+[INFO] |  |  +- org.apache.lucene:lucene-analyzers-smartcn:jar:7.4.0:compile
+[INFO] |  |  +- com.huaban:jieba-analysis:jar:1.0.2:compile
+[INFO] |  |  +- org.lionsoul:jcseg-core:jar:2.2.0:compile
+[INFO] |  |  +- com.chenlb.mmseg4j:mmseg4j-core:jar:1.10.0:compile
+[INFO] |  |  \- com.janeluo:ikanalyzer:jar:2012_u6:compile
+[INFO] |  +- org.apache.tinkerpop:gremlin-server:jar:3.4.3:compile
+[INFO] |  +- org.glassfish.jersey.core:jersey-server:jar:2.25.1:compile
+[INFO] |  |  +- org.glassfish.jersey.core:jersey-common:jar:2.25.1:compile
+[INFO] |  |  |  +- org.glassfish.jersey.bundles.repackaged:jersey-guava:jar:2.25.1:compile
+[INFO] |  |  |  \- org.glassfish.hk2:osgi-resource-locator:jar:1.0.1:compile
+[INFO] |  |  +- org.glassfish.jersey.core:jersey-client:jar:2.25.1:compile
+[INFO] |  |  +- javax.ws.rs:javax.ws.rs-api:jar:2.0.1:compile
+[INFO] |  |  +- org.glassfish.jersey.media:jersey-media-jaxb:jar:2.25.1:compile
+[INFO] |  |  +- javax.annotation:javax.annotation-api:jar:1.2:compile
+[INFO] |  |  +- org.glassfish.hk2:hk2-api:jar:2.5.0-b32:compile
+[INFO] |  |  |  +- org.glassfish.hk2:hk2-utils:jar:2.5.0-b32:compile
+[INFO] |  |  |  \- org.glassfish.hk2.external:aopalliance-repackaged:jar:2.5.0-b32:compile
+[INFO] |  |  +- org.glassfish.hk2.external:javax.inject:jar:2.5.0-b32:compile
+[INFO] |  |  \- org.glassfish.hk2:hk2-locator:jar:2.5.0-b32:compile
+[INFO] |  +- org.glassfish.jersey.containers:jersey-container-grizzly2-http:jar:2.25.1:compile
+[INFO] |  |  \- org.glassfish.grizzly:grizzly-http-server:jar:2.3.28:compile
+[INFO] |  |     \- org.glassfish.grizzly:grizzly-http:jar:2.3.28:compile
+[INFO] |  |        \- org.glassfish.grizzly:grizzly-framework:jar:2.3.28:compile
+[INFO] |  +- org.glassfish.jersey.containers:jersey-container-grizzly2-servlet:jar:2.25.1:compile
+[INFO] |  |  +- javax.servlet:javax.servlet-api:jar:3.0.1:compile
+[INFO] |  |  \- org.glassfish.grizzly:grizzly-http-servlet:jar:2.3.28:compile
+[INFO] |  +- org.glassfish.jersey.media:jersey-media-json-jackson:jar:2.25.1:compile
+[INFO] |  |  +- org.glassfish.jersey.ext:jersey-entity-filtering:jar:2.25.1:compile
+[INFO] |  |  \- com.fasterxml.jackson.core:jackson-annotations:jar:2.8.4:compile
+[INFO] |  \- io.dropwizard.metrics:metrics-jersey2:jar:3.1.0:compile
+[INFO] |     \- io.dropwizard.metrics:metrics-annotation:jar:3.1.0:compile
+[INFO] +- com.baidu.hugegraph:hugegraph-client:jar:1.8.0:compile
+[INFO] |  \- org.glassfish.jersey.containers:jersey-container-servlet:jar:2.22:compile
+[INFO] |     \- org.glassfish.jersey.containers:jersey-container-servlet-core:jar:2.22:compile
+[INFO] +- org.antlr:antlr-runtime:jar:3.2:compile
+[INFO] |  \- org.antlr:stringtemplate:jar:3.2:compile
+[INFO] |     \- antlr:antlr:jar:2.7.7:compile
+[INFO] +- com.google.guava:guava:jar:16.0.1:compile
+[INFO] +- colt:colt:jar:1.2.0:compile
+[INFO] |  \- concurrent:concurrent:jar:1.3.4:compile
+[INFO] +- commons-codec:commons-codec:jar:1.7:compile
+[INFO] +- org.apache.commons:commons-collections4:jar:4.0:compile
+[INFO] +- org.apache.commons:commons-math3:jar:3.4.1:compile
+[INFO] +- commons-configuration:commons-configuration:jar:1.10:compile
+[INFO] |  +- commons-lang:commons-lang:jar:2.6:compile
+[INFO] |  \- commons-logging:commons-logging:jar:1.1.1:compile
+[INFO] +- org.apache.commons:commons-lang3:jar:3.3.2:compile
+[INFO] +- org.apache.logging.log4j:log4j-api:jar:2.1:compile
+[INFO] +- org.apache.logging.log4j:log4j-core:jar:2.1:compile
+[INFO] +- org.apache.logging.log4j:log4j-slf4j-impl:jar:2.1:compile
+[INFO] +- org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1.1:compile
+[INFO] +- com.tinkerpop.gremlin:gremlin-groovy:jar:2.6.0:compile
+[INFO] |  +- org.apache.ivy:ivy:jar:2.3.0:compile
+[INFO] |  +- org.codehaus.groovy:groovy:jar:1.8.9:compile
+[INFO] |  |  +- asm:asm:jar:3.2:compile
+[INFO] |  |  +- asm:asm-commons:jar:3.2:compile
+[INFO] |  |  +- asm:asm-util:jar:3.2:compile
+[INFO] |  |  +- asm:asm-analysis:jar:3.2:compile
+[INFO] |  |  \- asm:asm-tree:jar:3.2:compile
+[INFO] |  +- org.apache.ant:ant:jar:1.8.3:compile
+[INFO] |  |  \- org.apache.ant:ant-launcher:jar:1.8.3:compile
+[INFO] |  +- org.fusesource.jansi:jansi:jar:1.5:compile
+[INFO] |  \- jline:jline:jar:0.9.94:compile
+[INFO] +- com.tinkerpop.gremlin:gremlin-java:jar:2.6.0:compile
+[INFO] |  \- com.tinkerpop.blueprints:blueprints-core:jar:2.6.0:compile
+[INFO] +- com.github.stephenc.high-scale-lib:high-scale-lib:jar:1.1.2:compile
+[INFO] +- com.sleepycat:je:jar:5.0.73:compile
+[INFO] +- net.java.dev.jna:jna:jar:4.0.0:compile
+[INFO] +- org.apache.lucene:lucene-core:jar:3.6.2:compile
+[INFO] +- org.neo4j:neo4j-cypher:jar:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-kernel:jar:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-lucene-index:jar:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-graph-matching:jar:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-graph-algo:jar:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-cypher-commons:jar:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-cypher-compiler-1.9:jar:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-cypher-compiler-2.0:jar:2.0.1:compile
+[INFO] |  |  \- org.parboiled:parboiled-scala_2.10:jar:1.1.6:compile
+[INFO] |  |     \- org.parboiled:parboiled-core:jar:1.1.6:compile
+[INFO] |  +- com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:jar:1.3.1:compile
+[INFO] |  \- org.scala-lang:scala-library:jar:2.10.3:compile
+[INFO] +- org.neo4j:neo4j:jar:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-udc:jar:2.0.1:compile
+[INFO] |  \- org.neo4j:neo4j-jmx:jar:2.0.1:compile
+[INFO] +- com.tinkerpop.blueprints:blueprints-neo4j2-graph:jar:2.6.0:compile
+[INFO] |  +- org.neo4j:neo4j:pom:2.0.1:compile
+[INFO] |  +- org.neo4j:neo4j-ha:jar:2.0.1:compile
+[INFO] |  |  +- org.neo4j:neo4j-backup:jar:2.0.1:compile
+[INFO] |  |  |  \- org.neo4j:neo4j-consistency-check:jar:2.0.1:compile
+[INFO] |  |  +- org.neo4j:neo4j-com:jar:2.0.1:compile
+[INFO] |  |  \- org.neo4j:neo4j-cluster:jar:2.0.1:compile
+[INFO] |  \- org.neo4j:neo4j-management:jar:2.0.1:compile
+[INFO] +- com.orientechnologies:orientdb-graphdb:jar:2.2.5:compile
+[INFO] |  +- com.orientechnologies:orientdb-server:jar:2.2.5:compile
+[INFO] |  |  +- com.orientechnologies:orientdb-client:jar:2.2.5:compile
+[INFO] |  |  \- javax.mail:mail:jar:1.4.7:compile
+[INFO] |  |     \- javax.activation:activation:jar:1.1:compile
+[INFO] |  +- com.orientechnologies:orientdb-tools:jar:2.2.5:compile
+[INFO] |  \- com.orientechnologies:orientdb-core:jar:2.2.5:compile
+[INFO] +- com.tinkerpop:pipes:jar:2.6.0:compile
+[INFO] +- org.slf4j:slf4j-api:jar:1.7.5:compile
+[INFO] +- org.slf4j:slf4j-log4j12:jar:1.7.5:compile
+[INFO] |  \- log4j:log4j:jar:1.2.17:compile
+[INFO] +- org.iq80.snappy:snappy:jar:0.3:compile
+[INFO] +- com.spatial4j:spatial4j:jar:0.3:compile
+[INFO] +- com.thinkaurelius.titan:titan-berkeleyje:jar:0.5.4:compile
+[INFO] +- com.thinkaurelius.titan:titan-cassandra:jar:0.5.4:compile
+[INFO] |  \- org.jboss.netty:netty:jar:3.2.7.Final:compile
+[INFO] +- com.thinkaurelius.titan:titan-hbase:jar:0.5.4:compile
+[INFO] +- com.thinkaurelius.titan:titan-core:jar:0.5.4:compile
+[INFO] |  +- com.thinkaurelius.groovy-shaded-asm:groovy-shaded-asm:jar:1.8.9:compile
+[INFO] |  +- com.tinkerpop:frames:jar:2.5.0:compile
+[INFO] |  +- com.codahale.metrics:metrics-ganglia:jar:3.0.1:compile
+[INFO] |  +- com.codahale.metrics:metrics-graphite:jar:3.0.1:compile
+[INFO] |  \- com.esotericsoftware.kryo:kryo:jar:2.22:compile
+[INFO] +- org.apache.hbase:hbase-client:jar:1.2.0:compile
+[INFO] |  +- org.apache.hbase:hbase-annotations:jar:1.2.0:compile
+[INFO] |  +- org.apache.hbase:hbase-common:jar:1.2.0:compile
+[INFO] |  |  \- org.mortbay.jetty:jetty-util:jar:6.1.26:compile
+[INFO] |  +- org.apache.hbase:hbase-protocol:jar:1.2.0:compile
+[INFO] |  +- com.google.protobuf:protobuf-java:jar:2.5.0:compile
+[INFO] |  +- io.netty:netty-all:jar:4.0.23.Final:compile
+[INFO] |  +- org.apache.zookeeper:zookeeper:jar:3.4.6:compile
+[INFO] |  +- org.apache.htrace:htrace-core:jar:3.1.0-incubating:compile
+[INFO] |  +- org.codehaus.jackson:jackson-mapper-asl:jar:1.9.13:compile
+[INFO] |  +- org.jruby.jcodings:jcodings:jar:1.0.8:compile
+[INFO] |  +- org.jruby.joni:joni:jar:2.1.2:compile
+[INFO] |  +- com.yammer.metrics:metrics-core:jar:2.2.0:compile
+[INFO] |  +- org.apache.hadoop:hadoop-auth:jar:2.5.1:compile
+[INFO] |  |  +- org.apache.httpcomponents:httpclient:jar:4.3.6:compile
+[INFO] |  |  \- org.apache.directory.server:apacheds-kerberos-codec:jar:2.0.0-M15:compile
+[INFO] |  |     +- org.apache.directory.server:apacheds-i18n:jar:2.0.0-M15:compile
+[INFO] |  |     +- org.apache.directory.api:api-asn1-api:jar:1.0.0-M20:compile
+[INFO] |  |     \- org.apache.directory.api:api-util:jar:1.0.0-M20:compile
+[INFO] |  +- org.apache.hadoop:hadoop-common:jar:2.5.1:compile
+[INFO] |  |  +- org.apache.hadoop:hadoop-annotations:jar:2.5.1:compile
+[INFO] |  |  |  \- jdk.tools:jdk.tools:jar:1.6:system
+[INFO] |  |  +- xmlenc:xmlenc:jar:0.52:compile
+[INFO] |  |  +- commons-httpclient:commons-httpclient:jar:3.1:compile
+[INFO] |  |  +- commons-net:commons-net:jar:3.1:compile
+[INFO] |  |  +- commons-el:commons-el:jar:1.0:runtime
+[INFO] |  |  +- org.apache.avro:avro:jar:1.7.4:compile
+[INFO] |  |  |  \- com.thoughtworks.paranamer:paranamer:jar:2.3:compile
+[INFO] |  |  +- com.jcraft:jsch:jar:0.1.42:compile
+[INFO] |  |  \- org.apache.commons:commons-compress:jar:1.4.1:compile
+[INFO] |  |     \- org.tukaani:xz:jar:1.0:compile
+[INFO] |  +- org.apache.hadoop:hadoop-mapreduce-client-core:jar:2.5.1:compile
+[INFO] |  |  +- org.apache.hadoop:hadoop-yarn-common:jar:2.5.1:compile
+[INFO] |  |  |  +- org.apache.hadoop:hadoop-yarn-api:jar:2.5.1:compile
+[INFO] |  |  |  \- javax.xml.bind:jaxb-api:jar:2.2.2:compile
+[INFO] |  |  |     \- javax.xml.stream:stax-api:jar:1.0-2:compile
+[INFO] |  |  \- io.netty:netty:jar:3.6.2.Final:compile
+[INFO] |  \- com.github.stephenc.findbugs:findbugs-annotations:jar:1.3.9-1:compile
+[INFO] +- com.amazonaws:dynamodb-titan054-storage-backend:jar:1.0.0:compile
+[INFO] |  +- com.amazonaws:aws-java-sdk-dynamodb:jar:1.11.479:compile
+[INFO] |  |  +- com.amazonaws:aws-java-sdk-s3:jar:1.11.725:compile
+[INFO] |  |  |  \- com.amazonaws:aws-java-sdk-kms:jar:1.11.725:compile
+[INFO] |  |  +- com.amazonaws:aws-java-sdk-core:jar:1.11.725:compile
+[INFO] |  |  |  +- software.amazon.ion:ion-java:jar:1.0.2:compile
+[INFO] |  |  |  \- com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:jar:2.6.7:compile
+[INFO] |  |  \- com.amazonaws:jmespath-java:jar:1.11.725:compile
+[INFO] |  +- com.amazonaws:DynamoDBLocal:jar:1.12.0:compile
+[INFO] |  |  +- org.antlr:antlr4-runtime:jar:4.7.2:compile
+[INFO] |  |  +- com.almworks.sqlite4java:libsqlite4java-linux-i386:so:1.0.392:runtime
+[INFO] |  |  |  \- com.almworks.sqlite4java:sqlite4java:jar:1.0.392:runtime
+[INFO] |  |  +- com.almworks.sqlite4java:libsqlite4java-linux-amd64:so:1.0.392:runtime
+[INFO] |  |  +- com.almworks.sqlite4java:sqlite4java-win32-x64:dll:1.0.392:runtime
+[INFO] |  |  +- com.almworks.sqlite4java:sqlite4java-win32-x86:dll:1.0.392:runtime
+[INFO] |  |  +- com.almworks.sqlite4java:libsqlite4java-osx:dylib:1.0.392:runtime
+[INFO] |  |  +- org.eclipse.jetty:jetty-client:jar:8.1.12.v20130726:compile
+[INFO] |  |  |  \- org.eclipse.jetty:jetty-http:jar:8.1.12.v20130726:compile
+[INFO] |  |  |     \- org.eclipse.jetty:jetty-io:jar:8.1.12.v20130726:compile
+[INFO] |  |  |        \- org.eclipse.jetty:jetty-util:jar:8.1.12.v20130726:compile
+[INFO] |  |  +- org.eclipse.jetty:jetty-server:jar:8.1.12.v20130726:compile
+[INFO] |  |  |  +- org.eclipse.jetty.orbit:javax.servlet:jar:3.0.0.v201112011016:compile
+[INFO] |  |  |  \- org.eclipse.jetty:jetty-continuation:jar:8.1.12.v20130726:compile
+[INFO] |  |  \- org.mockito:mockito-core:jar:1.10.19:compile
+[INFO] |  |     \- org.objenesis:objenesis:jar:2.1:runtime
+[INFO] |  \- au.com.bytecode:opencsv:jar:2.4:compile
+[INFO] +- com.sparsity:sparkseejava:jar:5.0.0:compile
+[INFO] +- com.tinkerpop.blueprints:blueprints-sparksee-graph:jar:2.6.0:compile
+[INFO] +- junit:junit:jar:4.11:test (scope not updated to compile)
+[INFO] |  \- org.hamcrest:hamcrest-core:jar:1.3:test
+[INFO] +- com.codahale.metrics:metrics-core:jar:3.0.0-BETA3:compile
+[INFO] +- com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:jar:2.8.4:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-core:jar:2.8.4:compile
+[INFO] |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.8.4:compile
+[INFO] \- com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:jar:2.8.4:compile
+[INFO]    \- com.fasterxml.jackson.module:jackson-module-jaxb-annotations:jar:2.8.4:compile
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 01:03 min
+[INFO] Finished at: 2020-02-19T19:16:51+08:00
+[INFO] Final Memory: 96M/796M
+[INFO] ------------------------------------------------------------------------

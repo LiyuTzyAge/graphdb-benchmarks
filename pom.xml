@@ -76,6 +76,21 @@
         <!--</dependency>-->
         <!-- Janusgraph -->
         <dependency>
+            <groupId>com.carrotsearch</groupId>
+            <artifactId>hppc</artifactId>
+            <version>0.7.1</version>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.carrotsearch</groupId>-->
+            <!--<artifactId>junit-benchmarks</artifactId>-->
+            <!--<version>0.7.0</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.carrotsearch.randomizedtesting</groupId>-->
+            <!--<artifactId>randomizedtesting-runner</artifactId>-->
+            <!--<version>2.7.2</version>-->
+        <!--</dependency>-->
+        <dependency>
             <groupId>org.janusgraph</groupId>
             <artifactId>janusgraph-core</artifactId>
             <version>${janusgraph.version}</version>
@@ -197,11 +212,11 @@
             <artifactId>high-scale-lib</artifactId>
             <version>1.1.2</version>
         </dependency>
-        <dependency>
-            <groupId>com.carrotsearch</groupId>
-            <artifactId>hppc</artifactId>
-            <version>0.4.2</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.carrotsearch</groupId>-->
+            <!--<artifactId>hppc</artifactId>-->
+            <!--<version>0.4.2</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
