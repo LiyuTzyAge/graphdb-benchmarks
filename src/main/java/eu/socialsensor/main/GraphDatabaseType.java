@@ -22,7 +22,8 @@ public enum GraphDatabaseType
     NEO4J("Neo4j", null, "neo4j"),
     SPARKSEE("Sparksee", null, "sparksee"),
     HUGEGRAPH("HugeGraph", null, "hugegraphclient"),
-    HUGEGRAPH_CORE("HugeGraphCore", null, "hugegraphcore");
+    HUGEGRAPH_CORE("HugeGraphCore", null, "hugegraphcore"),
+    JANUSGRAPH_CORE("JanusGraphCore",null,"janusgraphcore");
 
     private final String backend;
     private final String api;

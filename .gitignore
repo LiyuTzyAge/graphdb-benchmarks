@@ -11,3 +11,4 @@ graphdb-benchmarks.iml
 metrics/
 results/
 storage/
+logs/

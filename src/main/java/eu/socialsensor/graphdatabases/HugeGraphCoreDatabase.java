@@ -64,8 +64,9 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
 
     private HugeGraph graph = null;
     private GraphTraversalSource g = null;
-
-    private static final String CONF = "hugegraph.properties";
+//    change static to instance by liyu04
+//    private static final String CONF = "hugegraph.properties";
+    private final String conf ;
     private static boolean registered = false;
 
     private static final String NODE = "node";
@@ -75,6 +76,7 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
     public HugeGraphCoreDatabase(BenchmarkConfiguration config,
                                  File dbStorageDirectoryIn) {
         super(GraphDatabaseType.HUGEGRAPH_CORE, dbStorageDirectoryIn);
+        conf = config.getHugegraphConf();
     }
 
     @Override
@@ -478,22 +480,31 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
         return this.g.V().has(NODE, prop, value);
     }
 
-    private static HugeGraph loadGraph(boolean needClear) {
+    /**
+     * update by liyu04
+     * change static to instance
+     * @param needClear
+     * @return
+     */
+//    private static HugeGraph loadGraph(boolean needClear) {
+    private HugeGraph loadGraph(boolean needClear) {
         // Register backends if needed
         if (!registered) {
             RegisterUtil.registerBackends();
             registered = true;
         }
 
-        String conf = CONF;
+//        String conf = CONF;
+        String conf = this.conf;
         try {
             String path = HugeGraphCoreDatabase.class.getClassLoader()
-                                               .getResource(CONF).getPath();
+                                               .getResource(this.conf).getPath();
             File file = new File(path);
             if (file.exists() && file.isFile()) {
                 conf = path;
             }
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
         // Open graph using configuration file
         HugeGraph graph = HugeFactory.open(conf);

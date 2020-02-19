@@ -15,8 +15,10 @@ import eu.socialsensor.main.GraphDatabaseType;
 @SuppressWarnings("deprecation")
 public abstract class GraphDatabaseBase<VertexIteratorType, EdgeIteratorType, VertexType, EdgeType> implements GraphDatabase<VertexIteratorType, EdgeIteratorType, VertexType, EdgeType>
 {
+    //边label
     public static final String SIMILAR = "similar";
     public static final String QUERY_CONTEXT = ".eu.socialsensor.query.";
+    //顶点属性
     public static final String NODE_ID = "nodeId";
     public static final String NODE_COMMUNITY = "nodeCommunity";
     public static final String COMMUNITY = "community";

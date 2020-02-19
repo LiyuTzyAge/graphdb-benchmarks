@@ -141,10 +141,11 @@ public class GraphDatabaseBenchmark
      * 
      * @throws ExecutionException
      */
-    public static void main(String[] args) throws ExecutionException
+    public static void main(String[] args) throws ExecutionException, InterruptedException
     {
         final String inputPath = args.length != 1 ? null : args[0];
         GraphDatabaseBenchmark benchmarks = new GraphDatabaseBenchmark(inputPath);
+        Thread.sleep(2000);
         try
         {
             benchmarks.run();
@@ -152,6 +153,7 @@ public class GraphDatabaseBenchmark
         catch (Throwable t)
         {
             logger.fatal(t.getMessage());
+            t.printStackTrace();
             System.exit(1);
         }
         System.exit(0);

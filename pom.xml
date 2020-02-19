@@ -53,6 +53,7 @@
         <blueprints.version>2.6.0</blueprints.version>
         <orientdb.version>2.2.5</orientdb.version>
         <titan.version>0.5.4</titan.version>
+        <janusgraph.version>0.4.0</janusgraph.version>
         <!--<hbase.version>0.98.8-hadoop2</hbase.version>-->
         <hbase.version>1.2.0</hbase.version>
         <neo4j.version>2.0.1</neo4j.version>
@@ -66,6 +67,40 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/DynamoDBLocal -->
+        <!--<dependency>-->
+            <!--<groupId>com.amazonaws</groupId>-->
+            <!--<artifactId>DynamoDBLocal</artifactId>-->
+            <!--<version>1.12.0</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
+        <!-- Janusgraph -->
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-core</artifactId>
+            <version>${janusgraph.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-cassandra</artifactId>
+            <version>${janusgraph.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.ning</groupId>
+                    <artifactId>compress-lzf</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-cql</artifactId>
+            <version>${janusgraph.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.janusgraph</groupId>
+            <artifactId>janusgraph-berkeleyje</artifactId>
+            <version>${janusgraph.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-dist</artifactId>
@@ -390,7 +425,8 @@
                                 <goal>copy-dependencies</goal>
                             </goals>
                             <configuration>
-                                <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+                                <!--<outputDirectory>${project.build.directory}/dependency</outputDirectory>-->
+                                <outputDirectory>E:\ideahouse\hugeGraph\benchmarks\graphdb-benchmarks\target\dependency</outputDirectory>
                                 <overWriteReleases>false</overWriteReleases>
                                 <overWriteSnapshots>false</overWriteSnapshots>
                                 <overWriteIfNewer>true</overWriteIfNewer>
@@ -435,7 +471,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.5.3</version>
+                        <version>3.1.0</version>
                         <configuration>
                             <descriptors>
                                 <descriptor>src/assembly/component.xml</descriptor>
