@@ -1,14 +1,19 @@
 package eu.socialsensor.utils;
 
 import eu.socialsensor.graphdatabases.JanusGraphCoreDatabase;
+import jnr.ffi.annotations.In;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.tinkerpop.gremlin.process.traversal.Path;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.janusgraph.core.JanusGraph;
-import org.janusgraph.core.JanusGraphFactory;
+import org.janusgraph.core.*;
+import org.janusgraph.core.schema.JanusGraphManagement;
 import org.janusgraph.diskstorage.BackendException;
 import org.janusgraph.graphdb.database.StandardJanusGraph;
 
@@ -16,6 +21,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.__.out;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.has;
 
 /**
  *  @author: liyu04
@@ -63,13 +71,19 @@ public class JanusGraphUtils
      * @param id
      * @return
      */
-    private static long toVertexId(JanusGraph graph, Long id)
+    public static long toVertexId(JanusGraph graph, Long id)
     {
-        return ((StandardJanusGraph) graph).getIDManager().toVertexId(id);
+        long tmp = id;
+        //janusgraph 顶点不许大于零
+        if (tmp == 0) {
+            long tt = Integer.MAX_VALUE;
+            tmp = tt+1L;
+        }
+        return ((StandardJanusGraph) graph).getIDManager().toVertexId(tmp);
     }
 
     /**
-     * 已测
+     * 已测(不适用与批量模式，批量模式会自动为不存在的id分配点，因为关闭了一致性检查)
      * @param graph
      * @param id
      * @return
@@ -104,10 +118,22 @@ public class JanusGraphUtils
     {
         JanusGraphFactory.drop(graph);
     }
+    private static final Logger LOG = LogManager.getLogger();
+    public static void shortestPath(JanusGraph graph,Vertex fromNode, Integer node)
+    {
+        LOG.debug("##janusgraph :shortest path {} round, (from node: {}, to node: {})",
+                0, fromNode.id(), node);
+        GraphTraversal<Vertex, Path> limit = graph.traversal().V(fromNode.id()).repeat(out().simplePath()).until(has("nodeId", node)).path().limit(1);
+
+        LOG.debug("##janusgraph :{}", limit.hasNext() ? limit.next().toString() : null);
+    }
 
     public static void main(String[] args) throws BackendException
     {
         JanusGraph graph = JanusGraphUtils.createGraph(false, "E:\\ideahouse\\hugeGraph\\benchmarks\\graphdb-benchmarks\\janusgraph.properties");
+        Vertex vertex1 = graph.vertices(256L).next();
+        shortestPath(graph, vertex1, 18944);
+        System.exit(1);
         Vertex v1 = getVertex(graph, 1L);
         if (null != v1) {
             System.out.println("====================v1 exists");

@@ -123,6 +123,11 @@
         </dependency>
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>hugegraph-cassandra</artifactId>
+            <version>${hugegraph.dist.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-api</artifactId>
             <version>${hugegraph.dist.version}</version>
         </dependency>

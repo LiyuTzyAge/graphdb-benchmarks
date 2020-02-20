@@ -226,8 +226,9 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         LOG.debug("##janusgraph :shortest path {} round, (from node: {}, to node: {})",
                 counter, fromNode.id(), node);
         counter++;
-        GraphTraversal<Vertex, Path> limit = g.V(fromNode.id()).repeat(out().simplePath()).until(has(NODE_ID, node)).path().limit(1);
-        LOG.debug("##janusgraph :{}", limit.toString());
+//        Path path = g.V(fromNode.id()).repeat(out().simplePath()).until(has(NODE_ID, node)).path().limit(1).next();
+        Path path = g.V(fromNode.id()).repeat(out().simplePath()).times(5).emit(has(NODE_ID, node)).path().limit(1).next();
+        LOG.debug("##janusgraph :{}", path.toString());
     }
 
     @Override
@@ -492,8 +493,14 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     {
         open(true);
         clear(clear);
-        graph.tx().rollback();
+        open(true);
+//        graph.tx().rollback();
         //create schema
+        createSchema(this.graph);
+    }
+
+    public static void createSchema(JanusGraph graph)
+    {
         JanusGraphManagement mgmt = graph.openManagement();
         VertexLabel vertexLabel = null;
         EdgeLabel edgeLabel = null;
@@ -505,11 +512,11 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
             edgeLabel = mgmt.makeEdgeLabel(SIMILAR).multiplicity(Multiplicity.MULTI).make();
         }
         PropertyKey nodeid = getOrCreatePropertyKey(mgmt, NODE_ID, Integer.class, Cardinality.SINGLE);
-        buildVertexCompositeIndex(mgmt, NODE_ID, true, vertexLabel, nodeid);
+        buildVertexCompositeIndex(mgmt, NODE_ID, true, null, nodeid);
         PropertyKey community = getOrCreatePropertyKey(mgmt, COMMUNITY, Integer.class, Cardinality.SINGLE);
-        buildVertexCompositeIndex(mgmt, COMMUNITY, false, vertexLabel, community);
+        buildVertexCompositeIndex(mgmt, COMMUNITY, false, null, community);
         PropertyKey node_community = getOrCreatePropertyKey(mgmt, NODE_COMMUNITY, Integer.class, Cardinality.SINGLE);
-        buildVertexCompositeIndex(mgmt, NODE_COMMUNITY, false, vertexLabel, node_community);
+        buildVertexCompositeIndex(mgmt, NODE_COMMUNITY, false, null, node_community);
         mgmt.commit();
     }
 

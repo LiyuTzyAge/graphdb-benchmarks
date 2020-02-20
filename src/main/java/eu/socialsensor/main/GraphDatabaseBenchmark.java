@@ -138,11 +138,12 @@ public class GraphDatabaseBenchmark
 
     /**
      * This is the main function. Set the proper property file and run
-     * 
+     *
      * @throws ExecutionException
      */
     public static void main(String[] args) throws ExecutionException, InterruptedException
     {
+        //手动指定配置文件路径
         final String inputPath = args.length != 1 ? null : args[0];
         GraphDatabaseBenchmark benchmarks = new GraphDatabaseBenchmark(inputPath);
         Thread.sleep(2000);

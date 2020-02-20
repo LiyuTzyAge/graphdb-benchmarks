@@ -497,8 +497,9 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
 //        String conf = CONF;
         String conf = this.conf;
         try {
-            String path = HugeGraphCoreDatabase.class.getClassLoader()
-                                               .getResource(this.conf).getPath();
+//            String path = HugeGraphCoreDatabase.class.getClassLoader()
+//                                               .getResource(this.conf).getPath();
+            String path = conf;
             File file = new File(path);
             if (file.exists() && file.isFile()) {
                 conf = path;

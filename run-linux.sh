@@ -1,14 +1,17 @@
 #!/bin/bash
 
-CQLSH=/home/cassandra/cassandra/bin/cqlsh
-CASSANDRA_HOST=127.0.0.1
-CASSANDRA_PORT=8042
+CQLSH=/home/liyu04/graph/apache-cassandra-3.11.5/bin/cqlsh
+CASSANDRA_HOST=10.95.54.196
+CASSANDRA_PORT=9042
 DROP='DROP KEYSPACE IF EXISTS titan;'
 CASSANDRA_CONNECT_TIMEOUT=30
 CASSANDRA_REQUEST_TIMEOUT=60
 
-ROOT_DIR=.
-CONF_FILE=$ROOT_DIR/src/test/resources/META-INF/input.properties
+ROOT_DIR=`pwd`
+CONF_FILE=$ROOT_DIR/input.properties
+
+jars=lib
+CP=""
 
 dataset() {
     if [ $1 -eq 1 ]; then
@@ -64,7 +67,6 @@ community() {
 run() {
     # modify configuration
     sed -i "s/eu.socialsensor.results-path=results/eu.socialsensor.results-path=results\/$prefix/g" $CONF_FILE
-    #?????????????????
     sed -i "s/^#eu.socialsensor.benchmarks=MASSIVE_INSERTION/eu.socialsensor.benchmarks=MASSIVE_INSERTION/g" $CONF_FILE
     if [ $1 -lt 5 ]; then
         sed -i "s/^#eu.socialsensor.dataset=data\/$data/eu.socialsensor.dataset=data\/$data/g" $CONF_FILE
@@ -89,7 +91,9 @@ run() {
         rm -fr $ROOT_DIR/results/$prefix
     fi
     # test
-    mvn test > logs/$prefix.log 2>&1
+    jar_cp
+    java -cp :${CP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Dlog4j.configuration=file:/${ROOT_DIR}/log4j.properties eu.socialsensor.main.GraphDatabaseBenchmark  ${CONF_FILE} > logs/$prefix.log 2>&1
+    #mvn test > logs/$prefix.log 2>&1
     if [ $? -eq 0 ]; then
         echo "$prefix executed successfully!"
     else
@@ -103,7 +107,6 @@ run() {
 run_test() {
     # backup configuration file
     cp $CONF_FILE $CONF_FILE.bak
-    #??????????????????
     sed -i "s/^eu.socialsensor.dataset/#eu.socialsensor.dataset/g" $CONF_FILE
     sed -i "s/^eu.socialsensor.benchmarks/#eu.socialsensor.benchmarks/g" $CONF_FILE
     dataset $1
@@ -112,6 +115,13 @@ run_test() {
     # resume configuration file
     rm -f $CONF_FILE
     mv $CONF_FILE.bak $CONF_FILE
+}
+
+jar_cp() {
+    for i in `ls $jars`
+	do
+        CP=${CP}:${jars}/${i}
+    done
 }
 
 if [ $# -eq 0 -o "$1" = "-h" ]; then

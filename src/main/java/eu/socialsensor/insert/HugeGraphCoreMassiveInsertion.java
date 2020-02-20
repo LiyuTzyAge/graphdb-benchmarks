@@ -108,6 +108,8 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer> {
 
     @Override
     protected void post() {
+        batchCommit();
+        reset();
         this.pool.shutdown();
         try {
             this.pool.awaitTermination(60 * 5, TimeUnit.SECONDS);
