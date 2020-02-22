@@ -186,6 +186,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     public void createGraphForMassiveLoad()
     {
         buildGraphEnv(true,true);
+        //TODO: 测试下批量配置的效果
     }
 
     @Override
@@ -491,9 +492,9 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
 
     private void buildGraphEnv(boolean batch,boolean clear)
     {
-        open(true);
+        open(batch);
         clear(clear);
-        open(true);
+        open(batch);
 //        graph.tx().rollback();
         //create schema
         createSchema(this.graph);

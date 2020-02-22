@@ -117,6 +117,11 @@
             <version>${janusgraph.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.sleepycat</groupId>
+            <artifactId>je</artifactId>
+            <version>7.5.11</version>
+        </dependency>
+        <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-dist</artifactId>
             <version>${hugegraph.dist.version}</version>
@@ -223,10 +228,10 @@
             <!--<version>0.4.2</version>-->
         <!--</dependency>-->
         <dependency>
-            <groupId>com.sleepycat</groupId>
-            <artifactId>je</artifactId>
-            <version>5.0.73</version>
-        </dependency>
+        <groupId>com.sleepycat</groupId>
+        <artifactId>je</artifactId>
+        <version>5.0.73</version>
+    </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>

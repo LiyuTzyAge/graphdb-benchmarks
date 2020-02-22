@@ -33,18 +33,27 @@ public class JanusGraphCoreSingleInsertion  extends InsertionBase<Vertex>
     @Override
     protected Vertex getOrCreate(String value)
     {
-        Integer id = Integer.valueOf(value.trim());
-        Vertex vertex = JanusGraphUtils.getVertex(this.graph, id.longValue());
-        if (null == vertex) {
-            vertex = JanusGraphUtils.addVertex(this.graph, id.longValue());
+        try {
+            Integer id = Integer.valueOf(value.trim());
+            Vertex vertex = JanusGraphUtils.getVertex(this.graph, id.longValue());
+            if (null == vertex) {
+                vertex = JanusGraphUtils.addVertex(this.graph, id.longValue());
+            }
+            return vertex;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return vertex;
+        return null;
     }
 
     @Override
     protected void relateNodes(Vertex src, Vertex dest)
     {
-        src.addEdge(JanusGraphCoreDatabase.SIMILAR, dest);
-        this.graph.tx().commit();
+        try {
+            src.addEdge(JanusGraphCoreDatabase.SIMILAR, dest);
+            this.graph.tx().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

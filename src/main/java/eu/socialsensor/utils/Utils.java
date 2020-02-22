@@ -281,12 +281,14 @@ public class Utils
         SortedMap<GraphDatabaseType, Double> standardDeviations = new TreeMap<GraphDatabaseType, Double>();
         for (GraphDatabaseType type : times.keySet())
         {
+            //MathArrays.scale 数组的缩放复制，每个条目乘以val
             final double[] scaledTimesArray = MathArrays.scale(0.001, convert(times.get(type)));
             DescriptiveStatistics stats = new DescriptiveStatistics();
             for (double val : scaledTimesArray)
             {
                 stats.addValue(val);
             }
+            //计算平均值?
             means.put(type, stats.getMean());
             standardDeviations.put(type, stats.getStandardDeviation());
         }
@@ -306,6 +308,19 @@ public class Utils
         {
             throw new BenchmarkingException(String.format("Exception thrown when writing output to %s: %s", output,
                 e.getMessage()));
+        }
+    }
+
+    public static void writeTotalTime(File output,String benchmarkTitle,Map<GraphDatabaseType,Long> totalTimeMap)
+    {
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(output))) {
+            out.write(String.format("DB,%s total time (s)\n",benchmarkTitle));
+            for (Entry<GraphDatabaseType, Long> entry : totalTimeMap.entrySet()) {
+                out.write(String.format("%s,%f\n",entry.getKey().getShortname(),entry.getValue().floatValue()));
+            }
+        } catch (IOException e) {
+            throw new BenchmarkingException(String.format("Exception thrown when writing output to %s: %s", output,
+                    e.getMessage()));
         }
     }
 

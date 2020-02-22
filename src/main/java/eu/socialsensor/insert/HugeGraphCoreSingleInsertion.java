@@ -20,6 +20,7 @@
 package eu.socialsensor.insert;
 
 import java.io.File;
+import java.util.Iterator;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
@@ -43,11 +44,15 @@ public class HugeGraphCoreSingleInsertion extends InsertionBase<Vertex> {
         Vertex vertex = null;
         if (!HugeGraphUtils.isStringEmpty(value)) {
             Integer id = Integer.valueOf(value);
-            vertex = this.graph.vertices(id).next();
-            if (vertex == null) {
-                vertex = this.graph.addVertex(T.label, HugeGraphDatabase.NODE,
-                                              HugeGraphDatabase.NODE_ID, id);
+            Iterator<Vertex> vertices = this.graph.vertices(id);
+//            vertex = this.graph.vertices(id).next();
+            if (!vertices.hasNext()) {
+//                vertex = this.graph.addVertex(T.label, HugeGraphDatabase.NODE,
+//                                              HugeGraphDatabase.NODE_ID, id);
+                vertex = this.graph.addVertex(org.apache.tinkerpop.gremlin.structure.T.id, id, org.apache.tinkerpop.gremlin.structure.T.label, HugeGraphDatabase.NODE);
                 this.graph.tx().commit();
+            }else {
+                vertex = vertices.next();
             }
         }
         return vertex;

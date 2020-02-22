@@ -1,5 +1,6 @@
 package eu.socialsensor.benchmarks;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,11 +62,16 @@ public abstract class PermutingBenchmarkBase extends BenchmarkBase
         post();
     }
 
+    private final Map<GraphDatabaseType, Long> totalTimeMap = new HashMap<>();
     private void startBenchmarkInternalOnePermutation(Collection<GraphDatabaseType> types, int cntPermutations)
     {
         for (GraphDatabaseType type : types)
         {
+            long start = System.currentTimeMillis();
+//            LOG.info("=======> "+this.getClass().getSimpleName()+" database "+type+" start "+System.currentTimeMillis());
             benchmarkOne(type, cntPermutations);
+            totalTimeMap.put(type, (System.currentTimeMillis() - start));
+//            LOG.info("=======> "+this.getClass().getSimpleName()+" database "+type+" cost "+(System.currentTimeMillis()-start));
         }
     }
 
@@ -74,5 +80,7 @@ public abstract class PermutingBenchmarkBase extends BenchmarkBase
     public void post()
     {
         Utils.writeResults(outputFile, times, type.longname());
+        File f = new File(outputFile.getParent(), this.getClass().getSimpleName() + "-total.csv");
+        Utils.writeTotalTime(f,this.getClass().getSimpleName(),totalTimeMap);
     }
 }

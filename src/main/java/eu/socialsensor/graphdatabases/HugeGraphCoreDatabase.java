@@ -509,7 +509,6 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
         }
         // Open graph using configuration file
         HugeGraph graph = HugeFactory.open(conf);
-
         // Clear graph if needed
         if (needClear) {
             graph.clearBackend();

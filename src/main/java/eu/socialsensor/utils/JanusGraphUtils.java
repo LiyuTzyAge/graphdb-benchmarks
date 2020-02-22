@@ -131,9 +131,9 @@ public class JanusGraphUtils
     public static void main(String[] args) throws BackendException
     {
         JanusGraph graph = JanusGraphUtils.createGraph(false, "E:\\ideahouse\\hugeGraph\\benchmarks\\graphdb-benchmarks\\janusgraph.properties");
-        Vertex vertex1 = graph.vertices(256L).next();
-        shortestPath(graph, vertex1, 18944);
-        System.exit(1);
+//        Vertex vertex1 = graph.vertices(256L).next();
+//        shortestPath(graph, vertex1, 18944);
+//        System.exit(1);
         Vertex v1 = getVertex(graph, 1L);
         if (null != v1) {
             System.out.println("====================v1 exists");
@@ -148,6 +148,8 @@ public class JanusGraphUtils
             System.out.println("====================v1 not exists");
         }
         graph.tx().commit();
+        graph.close();
+        System.exit(1);
         dropGraph(graph);
         graph.close();
     }
