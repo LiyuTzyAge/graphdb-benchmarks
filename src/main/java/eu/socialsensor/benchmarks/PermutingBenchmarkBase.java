@@ -62,15 +62,22 @@ public abstract class PermutingBenchmarkBase extends BenchmarkBase
         post();
     }
 
-    private final Map<GraphDatabaseType, Long> totalTimeMap = new HashMap<>();
+    protected final Map<GraphDatabaseType, Long> totalTimeMap = new HashMap<>();
     private void startBenchmarkInternalOnePermutation(Collection<GraphDatabaseType> types, int cntPermutations)
     {
         for (GraphDatabaseType type : types)
         {
-            long start = System.currentTimeMillis();
+            //start
+            totalTimeMap.put(type, System.currentTimeMillis());
 //            LOG.info("=======> "+this.getClass().getSimpleName()+" database "+type+" start "+System.currentTimeMillis());
-            benchmarkOne(type, cntPermutations);
-            totalTimeMap.put(type, (System.currentTimeMillis() - start));
+            try {
+                benchmarkOne(type, cntPermutations);
+                //end
+                totalTimeMap.put(type, (System.currentTimeMillis() - totalTimeMap.get(type)));
+            } catch (Exception e) {
+                LOG.error("benchmark error !",e);
+                throw e;
+            }
 //            LOG.info("=======> "+this.getClass().getSimpleName()+" database "+type+" cost "+(System.currentTimeMillis()-start));
         }
     }

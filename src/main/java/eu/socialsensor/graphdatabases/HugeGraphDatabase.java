@@ -210,57 +210,61 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
     }
 
     private void clearAll() {
-        // Clear edge
-        this.hugeClient.graph().listEdges().forEach(edge -> {
-            this.hugeClient.graph().removeVertex(edge);
-        });
-        // Clear vertex
-        this.hugeClient.graph().listVertices().forEach(vertex -> {
-            this.hugeClient.graph().removeVertex(vertex);
-        });
-        // Clear schema
-        this.hugeClient.schema().getIndexLabels().forEach(indexLabel -> {
-            this.hugeClient.schema().removeIndexLabel(indexLabel.name());
-        });
-        this.hugeClient.schema().getEdgeLabels().forEach(edgeLabel -> {
-            this.hugeClient.schema().removeEdgeLabel(edgeLabel.name());
-        });
-        this.hugeClient.schema().getVertexLabels().forEach(vertexLabel -> {
-            this.hugeClient.schema().removeVertexLabel(vertexLabel.name());
-        });
-        this.hugeClient.schema().getPropertyKeys().forEach(propertyKey -> {
-            this.hugeClient.schema().removePropertyKey(propertyKey.name());
-        });
+        //custom-Error during truncate: Cannot achieve consistency level ALL
+        this.hugeClient.graphs().clear(this.conf.getHugegraphGraph(),"I'm sure to delete all data");
+//        // Clear edge
+//        this.hugeClient.graph().listEdges().forEach(edge -> {
+//            this.hugeClient.graph().removeEdge(edge.id());
+//        });
+//        // Clear vertex
+//        this.hugeClient.graph().listVertices().forEach(vertex -> {
+//            this.hugeClient.graph().removeVertex(vertex.id());
+//        });
+//        // Clear schema
+//        this.hugeClient.schema().getIndexLabels().forEach(indexLabel -> {
+//            this.hugeClient.schema().removeIndexLabel(indexLabel.name());
+//        });
+//        this.hugeClient.schema().getEdgeLabels().forEach(edgeLabel -> {
+//            this.hugeClient.schema().removeEdgeLabel(edgeLabel.name());
+//        });
+//        this.hugeClient.schema().getVertexLabels().forEach(vertexLabel -> {
+//            this.hugeClient.schema().removeVertexLabel(vertexLabel.name());
+//        });
+//        this.hugeClient.schema().getPropertyKeys().forEach(propertyKey -> {
+//            this.hugeClient.schema().removePropertyKey(propertyKey.name());
+//        });
     }
 
     @Override
     public void shortestPath(HugeVertex fromNode, Integer node) {
         LOG.debug(">>>>>" + counter++ + " round,(from node: " +
                   fromNode.vertex().id() + ", to node: " + node + ")");
-        String query = String.format("g.V(%s).repeat(out().simplePath())" +
-                                     ".until(hasId(%s).or().loops().is(gte(3)" +
-                                     ")).hasId(%s).path().limit(1)",
-                                     fromNode.vertex().id(), node, node);
-        ResultSet resultSet = this.gremlin.gremlin(query).execute();
-
-        Iterator<Result> results = resultSet.iterator();
-        results.forEachRemaining(result -> {
-            LOG.debug(result.getObject().getClass());
-            Object object = result.getObject();
-            if (object instanceof Vertex) {
-                LOG.debug(((Vertex) object).id());
-            } else if (object instanceof HugeEdge) {
-                LOG.debug(((HugeEdge) object).edge().id());
-            } else if (object instanceof Path) {
-                List<Object> elements = ((Path) object).objects();
-                elements.forEach(element -> {
-                    LOG.debug(element.getClass());
-                    LOG.debug(element);
-                });
-            } else {
-                LOG.debug(object);
-            }
-        });
+        Path path = hugeClient.traverser().shortestPath(fromNode.vertex().id(), node, Direction.OUT, SIMILAR, 5, -1, 0, -1);
+        LOG.debug("{}", path);
+//        String query = String.format("g.V(%s).repeat(out().simplePath())" +
+//                                     ".until(hasId(%s).or().loops().is(gte(3)" +
+//                                     ")).hasId(%s).path().limit(1)",
+//                                     fromNode.vertex().id(), node, node);
+//        ResultSet resultSet = this.gremlin.gremlin(query).execute();
+//
+//        Iterator<Result> results = resultSet.iterator();
+//        results.forEachRemaining(result -> {
+//            LOG.debug(result.getObject().getClass());
+//            Object object = result.getObject();
+//            if (object instanceof Vertex) {
+//                LOG.debug(((Vertex) object).id());
+//            } else if (object instanceof HugeEdge) {
+//                LOG.debug(((HugeEdge) object).edge().id());
+//            } else if (object instanceof Path) {
+//                List<Object> elements = ((Path) object).objects();
+//                elements.forEach(element -> {
+//                    LOG.debug(element.getClass());
+//                    LOG.debug(element);
+//                });
+//            } else {
+//                LOG.debug(object);
+//            }
+//        });
     }
 
     @Override

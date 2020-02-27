@@ -8,8 +8,12 @@ import org.apache.commons.configuration.ConfigurationUtils;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tinkerpop.gremlin.process.computer.traversal.step.map.ShortestPath;
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
+import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.*;
@@ -134,6 +138,11 @@ public class JanusGraphUtils
 //        Vertex vertex1 = graph.vertices(256L).next();
 //        shortestPath(graph, vertex1, 18944);
 //        System.exit(1);
+        //OLAP
+//        GraphTraversalSource g = graph.traversal();
+//        g.withComputer();
+//        Path nodeId = g.V(256L).shortestPath().with(ShortestPath.edges, Direction.OUT).with(ShortestPath.target, has("nodeId", 2)).next();
+//        System.out.println(nodeId.toString());
         Vertex v1 = getVertex(graph, 1L);
         if (null != v1) {
             System.out.println("====================v1 exists");

@@ -89,6 +89,8 @@ public class Neo4jGraphDatabase extends GraphDatabaseBase<Iterator<Node>, Iterat
     @Override
     public void createGraphForSingleLoad()
     {
+        //liyu04 添加，先删除原始数据
+        delete();
         neo4jGraph = new GraphDatabaseFactory().newEmbeddedDatabase(dbStorageDirectory.getAbsolutePath());
         try (final Transaction tx = beginUnforcedTransaction())
         {

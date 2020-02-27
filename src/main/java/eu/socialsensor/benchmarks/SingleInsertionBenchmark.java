@@ -49,6 +49,8 @@ public class SingleInsertionBenchmark extends PermutingBenchmarkBase implements 
     {
         GraphDatabase<?,?,?,?> graphDatabase = Utils.createDatabaseInstance(bench, type);
         graphDatabase.createGraphForSingleLoad();
+        // reset start time ,skip the time of totalTimeMap
+        super.totalTimeMap.put(type, System.currentTimeMillis());
         graphDatabase.singleModeLoading(bench.getDataset(), bench.getResultsPath(), scenarioNumber);
         graphDatabase.shutdown();
     }

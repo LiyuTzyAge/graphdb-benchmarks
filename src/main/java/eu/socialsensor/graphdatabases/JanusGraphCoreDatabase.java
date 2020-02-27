@@ -228,21 +228,29 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
                 counter, fromNode.id(), node);
         counter++;
 //        Path path = g.V(fromNode.id()).repeat(out().simplePath()).until(has(NODE_ID, node)).path().limit(1).next();
-        Path path = g.V(fromNode.id()).repeat(out().simplePath()).times(5).emit(has(NODE_ID, node)).path().limit(1).next();
+        //"g.V(%s).repeat(out().simplePath())" +
+        //                                     ".until(hasId(%s).or().loops().is(gte(3)" +
+        //                                     ")).hasId(%s).path().limit(1)"
+        Path path = graph.traversal().V(fromNode.id()).repeat(out().simplePath()).times(5).emit(has(NODE_ID, node)).path().limit(1).next();
         LOG.debug("##janusgraph :{}", path.toString());
     }
 
     @Override
     public int getNodeCount()
     {
-        return g.V().count().next().intValue();
+        return graph.traversal().V().count().next().intValue();
     }
 
+    /**
+     *
+     * @param nodeId properties
+     * @return
+     */
     @Override
     public Set<Integer> getNeighborsIds(int nodeId)
     {
         Set<Integer> neighbors = new HashSet<>();
-        GraphTraversal<Vertex, Vertex> outs = g.V().has(NODE_ID, nodeId).out(SIMILAR);
+        GraphTraversal<Vertex, Vertex> outs = graph.traversal().V().has(NODE_ID, nodeId).out(SIMILAR);
         while (outs.hasNext()) {
             Integer neighborId = outs.next().value(NODE_ID);
             neighbors.add(neighborId);
@@ -250,23 +258,51 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         return neighbors;
     }
 
+    /**
+     *
+     * @param nodeId properties
+     * @return
+     */
     @Override
     public double getNodeWeight(int nodeId)
     {
-        return this.getNodeDegree(getVertex(nodeId).id(), Direction.OUT);
+        return this.getNodeDegree(nodeId, Direction.OUT);
     }
 
+    /**
+     *
+     * @param id properties
+     * @param direction
+     * @return
+     */
     private long getNodeDegree(Object id, Direction direction) {
         switch (direction) {
             case IN:
-                return this.g.V(id).inE(SIMILAR).count().next();
+                return this.graph.traversal().V().has(NODE_ID,id).inE(SIMILAR).count().next();
             case OUT:
-                return this.g.V(id).outE(SIMILAR).count().next();
+                return this.graph.traversal().V().has(NODE_ID,id).outE(SIMILAR).count().next();
             case BOTH:
             default:
                 throw new AssertionError(String.format(
                         "Only support IN or OUT, but got: '%s'", direction));
         }
+    }
+    private long getNodeDegree2(Object id, Direction direction) {
+        switch (direction) {
+            case IN:
+                return this.graph.traversal().V(id).inE(SIMILAR).count().next();
+            case OUT:
+                return this.graph.traversal().V(id).outE(SIMILAR).count().next();
+            case BOTH:
+            default:
+                throw new AssertionError(String.format(
+                        "Only support IN or OUT, but got: '%s'", direction));
+        }
+    }
+    private void gCommit()
+    {
+        this.graph.tx().commit();
+//        createTransaction(false);
     }
 
     @Override
@@ -275,19 +311,19 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         LOG.debug("Init community property");
 
         int communityCounter = 0;
-        Iterator<Vertex> vertices = this.g.V();
+        Iterator<Vertex> vertices = this.graph.traversal().V();
         while (vertices.hasNext()) {
             Vertex v = vertices.next();
             v.property(NODE_COMMUNITY, communityCounter);
             v.property(COMMUNITY, communityCounter);
             communityCounter++;
-            if (communityCounter % (BATCH_SIZE / 2) == 0) {
-                this.graph.tx().commit();
-            }
+//            if (communityCounter % (BATCH_SIZE / 2) == 0) {
+//                gCommit();
+//            }
         }
 
         LOG.debug("Initial community number is: {}", communityCounter);
-        this.graph.tx().commit();
+        gCommit();
     }
 
     @Override
@@ -295,7 +331,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     {
         // NOTE: this method won't be called (LouvainMethod.updateBestCommunity)
         Set<Integer> communities = new HashSet<>();
-        Iterator<Vertex> vertices = this.g.V().has(NODE_COMMUNITY, nodeCommunities);
+        Iterator<Vertex> vertices = this.graph.traversal().V().has(NODE_COMMUNITY, nodeCommunities);
         while (vertices.hasNext()) {
             Vertex v = vertices.next();
             Iterator<Vertex> neighbors = v.vertices(Direction.OUT, SIMILAR);
@@ -308,13 +344,18 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         return communities;
     }
 
+    /**
+     *
+     * @param community
+     * @return properties
+     */
     @Override
     public Set<Integer> getNodesFromCommunity(int community)
     {
         Set<Integer> nodes = new HashSet<>();
-        Iterator<Vertex> vertices = this.g.V().has(COMMUNITY, community);
+        Iterator<Vertex> vertices = this.graph.traversal().V().has(COMMUNITY, community);
         while (vertices.hasNext()) {
-            nodes.add(((Number) vertices.next().id()).intValue());
+            nodes.add(((Number) vertices.next().value(NODE_ID)).intValue());
         }
         return nodes;
     }
@@ -323,28 +364,35 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     public Set<Integer> getNodesFromNodeCommunity(int nodeCommunity)
     {
         Set<Integer> nodes = new HashSet<>();
-        Iterator<Vertex> vertices = this.g.V().has(NODE_COMMUNITY,
+        Iterator<Vertex> vertices = this.graph.traversal().V().has(NODE_COMMUNITY,
                 nodeCommunity);
         while (vertices.hasNext()) {
-            nodes.add(((Number) vertices.next().id()).intValue());
+            nodes.add(((Number) vertices.next().value(NODE_ID)).intValue());
         }
         return nodes;
     }
 
+    /**
+     * zongdian
+     * @param nodeCommunity
+     * @param communityNodes
+     * @return
+     */
     @Override
     public double getEdgesInsideCommunity(int nodeCommunity, int communityNodes)
     {
         // NOTE: this method won't be called due to Cache
         long edges = 0L;
-        Set<Integer> commVertices = this.g.V().has(COMMUNITY, communityNodes).values(NODE_ID).toStream().map(id->((Number)id).intValue()).collect(Collectors.toSet());
-        Iterator<Vertex> vertices = this.g.V().has(NODE_COMMUNITY,
+        //update 0226
+        Set<Integer> commVertices = this.graph.traversal().V().has(COMMUNITY, communityNodes).values(NODE_ID).toStream().map(id->((Number)id).intValue()).collect(Collectors.toSet());
+        Iterator<Vertex> vertices = this.graph.traversal().V().has(NODE_COMMUNITY,
                 nodeCommunity);
         while (vertices.hasNext()) {
-            Iterator<Edge> neighbors = this.g.V(vertices.next().id())
+            Iterator<Edge> neighbors = this.graph.traversal().V(vertices.next().id())
                     .outE(SIMILAR);
             while (neighbors.hasNext()) {
                 Edge edge = neighbors.next();
-                Integer nb = ((Number) edge.outVertex().id()).intValue();
+                Integer nb = ((Number) edge.outVertex().value(NODE_ID)).intValue();
                 if (commVertices.contains(nb)) {
                     edges++;
                 }
@@ -357,9 +405,9 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     public double getCommunityWeight(int community)
     {
         long communityWeight = 0L;
-        Iterator<Vertex> vertices = this.g.V().has(COMMUNITY, community);
+        Iterator<Vertex> vertices = this.graph.traversal().V().has(COMMUNITY, community);
         while (vertices.hasNext()) {
-            communityWeight += getNodeDegree(vertices.next(),Direction.OUT);
+            communityWeight += getNodeDegree2(vertices.next().id(),Direction.OUT);
         }
         return communityWeight;
     }
@@ -369,10 +417,10 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     {
         // NOTE: this method won't be called due to Cache
         long nodeCommunityWeight = 0L;
-        Iterator<Vertex> vertices = this.g.V().has(NODE_COMMUNITY,
+        Iterator<Vertex> vertices = this.graph.traversal().V().has(NODE_COMMUNITY,
                 nodeCommunity);
         while (vertices.hasNext()) {
-            nodeCommunityWeight += getNodeDegree(vertices.next(),Direction.OUT);
+            nodeCommunityWeight += getNodeDegree2(vertices.next().id(),Direction.OUT);
         }
         return nodeCommunityWeight;
     }
@@ -380,21 +428,21 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     @Override
     public void moveNode(int from, int to)
     {
-        Iterator<Vertex> vertices = this.g.V().has(NODE_COMMUNITY, from);
+        Iterator<Vertex> vertices = this.graph.traversal().V().has(NODE_COMMUNITY, from);
         int count = 0;
         while (vertices.hasNext()) {
             vertices.next().property(COMMUNITY, to);
-            if (++count % BATCH_SIZE == 0) {
-                this.graph.tx().commit();
-            }
+//            if (++count % BATCH_SIZE == 0) {
+//                gCommit();
+//            }
         }
-        this.graph.tx().commit();
+        gCommit();
     }
 
     @Override
     public double getGraphWeightSum()
     {
-        return this.g.E().count().next();
+        return this.graph.traversal().E().count().next();
     }
 
     @Override
@@ -405,7 +453,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         Map<Integer, Integer> initCommunities = new HashMap<>();
         int communityCounter = 0;
         int count = 0;
-        Iterator<Vertex> vertices = this.g.V();
+        Iterator<Vertex> vertices = this.graph.traversal().V();
         while (vertices.hasNext()) {
             Vertex v = vertices.next();
             Integer communityId = v.value(COMMUNITY);
@@ -416,28 +464,32 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
             Integer newCommunityId = initCommunities.get(communityId);
             v.property(COMMUNITY, newCommunityId);
             v.property(NODE_COMMUNITY, newCommunityId);
-            if (++count % (BATCH_SIZE / 2) == 0) {
-                this.graph.tx().commit();
-            }
+//            if (++count % (BATCH_SIZE / 2) == 0) {
+//                gCommit();
+//            }
         }
-        this.graph.tx().commit();
+        gCommit();
 
         LOG.debug("Community number is now: {}", communityCounter);
         return communityCounter;
     }
 
+    /**
+     *
+     * @param nodeId properties
+     * @return
+     */
     @Override
     public int getCommunityFromNode(int nodeId)
     {
-        //TODO:待验证
-        Vertex vertex = JanusGraphUtils.getVertex(this.graph,(long) nodeId);
+        Vertex vertex = this.graph.traversal().V().has(NODE_ID,nodeId).limit(1).next();
         return vertex.value(COMMUNITY);
     }
 
     @Override
     public int getCommunity(int nodeCommunity)
     {
-        Vertex vertex = this.g.V()
+        Vertex vertex = this.graph.traversal().V()
                 .has(NODE_COMMUNITY, nodeCommunity)
                 .limit(1).next();
         return vertex.value(COMMUNITY);
@@ -448,7 +500,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     {
         // NOTE: this method won't be called due to Cache
         Set<Integer> nodeCommunities = new HashSet<>();
-        Iterator<Vertex> vertices = this.g.V().has(COMMUNITY, community);
+        Iterator<Vertex> vertices = this.graph.traversal().V().has(COMMUNITY, community);
         while (vertices.hasNext()) {
             Vertex v = vertices.next();
             int nodeCommunity = v.value(NODE_COMMUNITY);
@@ -463,15 +515,21 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         Map<Integer, List<Integer>> communities = new HashMap<>();
         for (int i = 0; i < numberOfCommunities; i++) {
             List<Integer> ids = new ArrayList<>();
-            Iterator<Vertex> vertices = this.g.V().has(COMMUNITY, i);
+            Iterator<Vertex> vertices = this.graph.traversal().V().has(COMMUNITY, i);
             while (vertices.hasNext()) {
-                ids.add(((Number) vertices.next().id()).intValue());
+//                ids.add(((Number) vertices.next().id()).intValue());
+                ids.add(((Number) vertices.next().value(NODE_ID)).intValue());
             }
             communities.put(i, ids);
         }
         return communities;
     }
 
+    /**
+     *
+     * @param nodeId vertexId
+     * @return
+     */
     @Override
     public boolean nodeExists(int nodeId)
     {

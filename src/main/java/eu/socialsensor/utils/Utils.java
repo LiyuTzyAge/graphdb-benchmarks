@@ -316,7 +316,8 @@ public class Utils
         try (BufferedWriter out = new BufferedWriter(new FileWriter(output))) {
             out.write(String.format("DB,%s total time (s)\n",benchmarkTitle));
             for (Entry<GraphDatabaseType, Long> entry : totalTimeMap.entrySet()) {
-                out.write(String.format("%s,%f\n",entry.getKey().getShortname(),entry.getValue().floatValue()));
+                //millsecond to second
+                out.write(String.format("%s,%f\n",entry.getKey().getShortname(),entry.getValue().floatValue()/1000));
             }
         } catch (IOException e) {
             throw new BenchmarkingException(String.format("Exception thrown when writing output to %s: %s", output,

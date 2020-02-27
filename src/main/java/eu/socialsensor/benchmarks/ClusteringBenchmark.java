@@ -105,17 +105,24 @@ public class ClusteringBenchmark extends BenchmarkBase implements RequiresGraphD
             Stopwatch watch = new Stopwatch();
             watch.start();
             LouvainMethod louvainMethodCache = new LouvainMethod(graphDatabase, cacheSize, bench.randomizedClustering());
-            louvainMethodCache.computeModularity();
-            timeMap.put(cacheSize, watch.elapsed(TimeUnit.MILLISECONDS) / 1000.0);
+            try {
+                louvainMethodCache.computeModularity();
+                timeMap.put(cacheSize, watch.elapsed(TimeUnit.MILLISECONDS) / 1000.0);
 
-            // evaluation with NMI
-            Map<Integer, List<Integer>> predictedCommunities = graphDatabase.mapCommunities(louvainMethodCache.getN());
-            Map<Integer, List<Integer>> actualCommunities = mapNodesToCommunities(Utils.readTabulatedLines(
-                bench.getActualCommunitiesFile(), 4 /* numberOfLinesToSkip */));
-            Metrics metrics = new Metrics();
-            double NMI = metrics.normalizedMutualInformation(bench.getNodesCount(), actualCommunities,
-                predictedCommunities);
-            LOG.info("NMI value: " + NMI);
+                // evaluation with NMI
+                Map<Integer, List<Integer>> predictedCommunities = graphDatabase.mapCommunities(louvainMethodCache.getN());
+//                System.out.println("======predictedCommunities"+predictedCommunities);
+                Map<Integer, List<Integer>> actualCommunities = mapNodesToCommunities(Utils.readTabulatedLines(
+                        bench.getActualCommunitiesFile(), 4 /* numberOfLinesToSkip */));
+//                System.out.println("======actualCommunities"+actualCommunities);
+//                System.out.println("======actualCommunities"+bench.getNodesCount());
+                Metrics metrics = new Metrics();
+                double NMI = metrics.normalizedMutualInformation(bench.getNodesCount(), actualCommunities,
+                        predictedCommunities);
+                LOG.info("NMI value: " + NMI);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         graphDatabase.shutdown();
         return timeMap;
