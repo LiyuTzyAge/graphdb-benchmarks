@@ -44,12 +44,17 @@ public class HugeGraphSingleInsertion extends InsertionBase<Vertex> {
     protected Vertex getOrCreate(String value) {
         Vertex vertex = null;
         if (!HugeGraphUtils.isStringEmpty(value)) {
-            String id = HugeGraphUtils.createId(HugeGraphDatabase.NODE, value);
-            vertex = this.graphManager.getVertex(id);
+//            String id = HugeGraphUtils.createId(HugeGraphDatabase.NODE, value);
+            Integer id = Integer.valueOf(value);
+            try {
+                vertex = this.graphManager.getVertex(Integer.valueOf(id));
+            } catch (com.baidu.hugegraph.exception.ServerException e) {
+                vertex = null;
+            }
             if (vertex == null) {
-                vertex = new Vertex(HugeGraphDatabase.NODE);
-                vertex.property(HugeGraphDatabase.NODE_ID, id);
-                this.graphManager.addVertex(T.label, HugeGraphDatabase.NODE,
+//                vertex = new Vertex(HugeGraphDatabase.NODE);
+//                vertex.property(HugeGraphDatabase.NODE_ID, id);
+                vertex = this.graphManager.addVertex(T.label, HugeGraphDatabase.NODE,T.id,id,
                                             HugeGraphDatabase.NODE_ID, id);
             }
         }

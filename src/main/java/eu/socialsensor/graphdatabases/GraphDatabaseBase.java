@@ -1,6 +1,8 @@
 package eu.socialsensor.graphdatabases;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.neo4j.graphdb.Transaction;
@@ -25,12 +27,14 @@ public abstract class GraphDatabaseBase<VertexIteratorType, EdgeIteratorType, Ve
     protected final File dbStorageDirectory;
     protected final MetricRegistry metrics = new MetricRegistry();
     protected final GraphDatabaseType type;
-    private final Timer nextVertexTimes;
+    protected final Timer nextVertexTimes;
     private final Timer getNeighborsOfVertexTimes;
     private final Timer nextEdgeTimes;
     private final Timer getOtherVertexFromEdgeTimes;
-    private final Timer getAllEdgesTimes;
+    protected final Timer getAllEdgesTimes;
     private final Timer shortestPathTimes;
+    private final Timer koutTimes;
+    private final Timer kneighborTimes;
 
     protected GraphDatabaseBase(GraphDatabaseType type, File dbStorageDirectory)
     {
@@ -42,6 +46,8 @@ public abstract class GraphDatabaseBase<VertexIteratorType, EdgeIteratorType, Ve
         this.getOtherVertexFromEdgeTimes = GraphDatabaseBenchmark.metrics.timer(queryTypeContext + "getOtherVertexFromEdge");
         this.getAllEdgesTimes = GraphDatabaseBenchmark.metrics.timer(queryTypeContext + "getAllEdges");
         this.shortestPathTimes = GraphDatabaseBenchmark.metrics.timer(queryTypeContext + "shortestPath");
+        this.koutTimes = GraphDatabaseBenchmark.metrics.timer(queryTypeContext + "kout");
+        this.kneighborTimes = GraphDatabaseBenchmark.metrics.timer(queryTypeContext + "kneighbor");
         
         this.dbStorageDirectory = dbStorageDirectory;
         if (!this.dbStorageDirectory.exists())
@@ -168,5 +174,70 @@ public abstract class GraphDatabaseBase<VertexIteratorType, EdgeIteratorType, Ve
                 ((Transaction) tx).finish();
             }
         }
+    }
+
+    public Double kouts(int k,Set<Integer> nodes)
+    {
+        Object tx = null;
+        if(GraphDatabaseType.NEO4J == type) {//TODO fix this
+            tx = ((Neo4jGraphDatabase) this).neo4jGraph.beginTx();
+        }
+        try {
+            Timer.Context ctxt;
+            List<Long> values = new ArrayList<>();
+            for(Integer i : nodes) {
+                //time this
+                ctxt = koutTimes.time();
+                try {
+                    values.add(kout(k,i));
+                } finally {
+                    ctxt.stop();
+                }
+            }
+            if(this instanceof Neo4jGraphDatabase) {
+                ((Transaction) tx).success();
+            }
+            //返回平均值
+            return avgArr(values);
+        } finally {//TODO fix this
+            if(GraphDatabaseType.NEO4J == type) {
+                ((Transaction) tx).finish();
+            }
+        }
+    }
+
+    public Double kneighbors(int k,Set<Integer> nodes)
+    {
+        Object tx = null;
+        if(GraphDatabaseType.NEO4J == type) {//TODO fix this
+            tx = ((Neo4jGraphDatabase) this).neo4jGraph.beginTx();
+        }
+        try {
+            Timer.Context ctxt;
+            List<Long> values = new ArrayList<>();
+            for(Integer i : nodes) {
+                //time this
+                ctxt = kneighborTimes.time();
+                try {
+                    values.add(kneighbor(k,i));
+                } finally {
+                    ctxt.stop();
+                }
+            }
+            if(this instanceof Neo4jGraphDatabase) {
+                ((Transaction) tx).success();
+            }
+            //返回平均值
+            return avgArr(values);
+        } finally {//TODO fix this
+            if(GraphDatabaseType.NEO4J == type) {
+                ((Transaction) tx).finish();
+            }
+        }
+    }
+
+    private static double avgArr(List<Long> arr)
+    {
+        return arr.stream().reduce((a, b) -> (a + b)).get().doubleValue() / arr.size();
     }
 }

@@ -236,6 +236,18 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     }
 
     @Override
+    public long kout(int k, int node)
+    {
+        return graph.traversal().V().has(NODE_ID, node).repeat(out()).times(k).count().next();
+    }
+
+    @Override
+    public long kneighbor(int k, int node)
+    {
+        return 0;
+    }
+
+    @Override
     public int getNodeCount()
     {
         return graph.traversal().V().count().next().intValue();

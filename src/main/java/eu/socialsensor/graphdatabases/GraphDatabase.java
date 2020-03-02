@@ -111,6 +111,25 @@ public interface GraphDatabase<VertexIteratorType, EdgeIteratorType, VertexType,
     public void shortestPath(final VertexType fromNode, Integer node);
 
     /**
+     * find out vertex numbers for each of the vertexes in the list
+     * @param k
+     * @param nodes
+     * @return
+     */
+    Double kouts(int k,Set<Integer> nodes);
+
+    /**
+     * find vertex number of out neighbor
+     * @param node
+     * @return
+     */
+    long kout(int k,int node);
+
+
+    Double kneighbors(int k,Set<Integer> nodes);
+
+    long kneighbor(int k, int node);
+    /**
      * @return the number of nodes
      */
     public int getNodeCount();

@@ -134,6 +134,18 @@ public class OrientGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Ite
     }
 
     @Override
+    public long kout(int k, int node)
+    {
+        return 0;
+    }
+
+    @Override
+    public long kneighbor(int k, int node)
+    {
+        return 0;
+    }
+
+    @Override
     public int getNodeCount()
     {
         return (int) graph.countVertices();

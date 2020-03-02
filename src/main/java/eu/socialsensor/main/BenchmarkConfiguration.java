@@ -59,6 +59,7 @@ public class BenchmarkConfiguration {
     private static final String CACHE_VALUES_COUNT = "cache-values-count";
     private static final String PERMUTE_BENCHMARKS = "permute-benchmarks";
     private static final String RANDOM_NODES = "shortest-path-random-nodes";
+    private static final String K_NAME = "k-out-neighbor";
 
     // hugegraph configuration
     private static final String HUGEGRAPH_URL = "url";
@@ -95,6 +96,7 @@ public class BenchmarkConfiguration {
 
     // shortest path
     private final int randomNodes;
+    private final int k;
 
     // clustering
     private final Boolean randomizedClustering;
@@ -234,7 +236,7 @@ public class BenchmarkConfiguration {
         }
 
         randomNodes = socialsensor.getInteger(RANDOM_NODES, new Integer(100));
-
+        k = socialsensor.getInteger(K_NAME, 1);
         if (this.benchmarkTypes.contains(BenchmarkType.CLUSTERING)) {
             if (!socialsensor.containsKey(NODES_COUNT)) {
                 throw new IllegalArgumentException("the CW benchmark requires nodes-count integer in config");
@@ -378,6 +380,11 @@ public class BenchmarkConfiguration {
 
     public int getRandomNodes() {
         return randomNodes;
+    }
+
+    public int getK()
+    {
+        return k;
     }
 
     public long getCsvReportingInterval() {

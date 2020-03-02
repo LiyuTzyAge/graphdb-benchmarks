@@ -1,13 +1,6 @@
 package eu.socialsensor.main;
 
-import eu.socialsensor.benchmarks.Benchmark;
-import eu.socialsensor.benchmarks.ClusteringBenchmark;
-import eu.socialsensor.benchmarks.DeleteGraphBenchmark;
-import eu.socialsensor.benchmarks.FindNeighboursOfAllNodesBenchmark;
-import eu.socialsensor.benchmarks.FindNodesOfAllEdgesBenchmark;
-import eu.socialsensor.benchmarks.FindShortestPathBenchmark;
-import eu.socialsensor.benchmarks.MassiveInsertionBenchmark;
-import eu.socialsensor.benchmarks.SingleInsertionBenchmark;
+import eu.socialsensor.benchmarks.*;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -128,6 +121,12 @@ public class GraphDatabaseBenchmark
                 break;
             case DELETION:
                 benchmark = new DeleteGraphBenchmark(config);
+                break;
+            case K_OUT:
+                benchmark = new KoutBenchmark(config);
+                break;
+            case K_NEIGHBOR:
+                benchmark = new KneighborsBenchmark(config);
                 break;
             default:
                 throw new UnsupportedOperationException("unsupported benchmark " + type == null ? "null"

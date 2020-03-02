@@ -29,6 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.baidu.hugegraph.driver.GraphManager;
+import com.baidu.hugegraph.structure.constant.T;
+import com.baidu.hugegraph.type.define.Directions;
+import com.codahale.metrics.Timer;
+import eu.socialsensor.utils.HugeGraphUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -125,6 +130,40 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
         return new Graph(this.hugeClient.graph()).vertices();
     }
 
+    /**
+     * TODO：待测试
+     */
+    @Override
+    public void findAllNodeNeighbours()
+    {
+        Timer.Context ctxt = super.nextVertexTimes.time();
+        try {
+//            ResultSet re = this.hugeClient.gremlin().gremlin("g.V().outE().outV().count()").execute();
+//            LOG.info("HugeGraph findAllNodeNeighbours count : "+re.data());
+            LOG.info("HugeGraph findAllNodeNeighbours count : "+0);
+        } finally {
+            ctxt.stop();
+        }
+    }
+
+    /**
+     * TODO：待测试
+     */
+    @Override
+    public void findNodesOfAllEdges()
+    {
+        Timer.Context ctxt = super.getAllEdgesTimes.time();
+        try {
+//            ResultSet re = this.hugeClient.gremlin().gremlin("g.E().bothV().count()").execute();
+//            LOG.info("HugeGraph findNodesOfAllEdges count : "+re.data());
+              LOG.info("HugeGraph findNodesOfAllEdges count : "+0);
+
+        } finally {
+            ctxt.stop();
+        }
+    }
+
+
     @Override
     public boolean vertexIteratorHasNext(Iterator<HugeVertex> it) {
         return it.hasNext();
@@ -198,8 +237,9 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
         }
         schema.propertyKey(COMMUNITY).asInt().ifNotExist().create();
         schema.propertyKey(NODE_COMMUNITY).asInt().ifNotExist().create();
+        schema.propertyKey(NODE_ID).asInt().ifNotExist().create();
         schema.vertexLabel(NODE)
-              .properties(COMMUNITY, NODE_COMMUNITY)
+              .properties(NODE_ID,COMMUNITY, NODE_COMMUNITY)
               .nullableKeys(COMMUNITY, NODE_COMMUNITY)
               .useCustomizeNumberId().ifNotExist().create();
         schema.edgeLabel(SIMILAR).link(NODE, NODE).ifNotExist().create();
@@ -265,6 +305,25 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
 //                LOG.debug(object);
 //            }
 //        });
+    }
+
+    @Override
+    public long kout(int k, int node)
+    {
+//        String direct = "out" ;
+//        String query = String.format("g.V('%s').repeat(%s()).times(%s).count()",
+//                node, direct, k);
+//        ResultSet resultSet = this.gremlin.gremlin(query).execute();
+//        Iterator<Result> it = resultSet.iterator();
+//        return ((Number) it.next().getObject()).longValue();
+        return this.hugeClient.traverser().kout(1,Direction.OUT,SIMILAR, 3,false).size();
+    }
+
+    @Override
+    public long kneighbor(int k, int node)
+    {
+        //gremlin:g.V(1).emit().repeat(bothE().dedup().store("edges").otherV()).times(1).dedup().aggregate("vertices").bothE().where(without("edges")).as("edge").otherV().where(within("vertices")).select("edge").store("edges").cap("vertices").next()
+        return this.hugeClient.traverser().kneighbor(1, Direction.BOTH, SIMILAR, 3).size();
     }
 
     @Override
@@ -489,5 +548,45 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
             vertices.add(it.next().getVertex());
         }
         return vertices;
+    }
+
+    public static void main(String[] args)
+    {
+        test();
+    }
+    public static void test()
+    {
+        HugeClient hugeClient = new HugeClient("http://10.95.109.145:18080",
+                "hugegraph",
+                CLIENT_TIMEOUT);
+        Vertex v = getOrCreate(hugeClient, "0");
+        System.out.println("======="+v);
+//        int size = hugeClient.traverser().kout(1, Direction.OUT, SIMILAR, 3, false, 10000L, 10000000L, 10000000L).size();
+        int size =hugeClient.traverser().kout(1,Direction.OUT,SIMILAR, 3,false).size();
+        System.out.println("======="+size);
+        int size1 = hugeClient.traverser().kneighbor(1, Direction.BOTH, SIMILAR, 3).size();
+        System.out.println("======="+size1);
+        hugeClient.close();
+    }
+
+    private static Vertex getOrCreate(HugeClient hugeClient,String value) {
+        GraphManager graphManager=hugeClient.graph();
+        Vertex vertex = null;
+        if (!HugeGraphUtils.isStringEmpty(value)) {
+//            String id = HugeGraphUtils.createId(HugeGraphDatabase.NODE, value);
+            Integer id = Integer.valueOf(value);
+            try {
+                vertex = graphManager.getVertex(Integer.valueOf(id));
+            } catch (com.baidu.hugegraph.exception.ServerException e) {
+                vertex = null;
+            }
+            if (vertex == null) {
+                vertex = new Vertex(HugeGraphDatabase.NODE);
+                vertex.property(HugeGraphDatabase.NODE_ID, id);
+                graphManager.addVertex(T.label, HugeGraphDatabase.NODE,
+                        HugeGraphDatabase.NODE_ID, id);
+            }
+        }
+        return vertex;
     }
 }

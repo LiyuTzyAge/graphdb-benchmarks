@@ -206,6 +206,18 @@ public class SparkseeGraphDatabase extends GraphDatabaseBase<ObjectsIterator, Ob
     }
 
     @Override
+    public long kout(int k, int node)
+    {
+        return 0;
+    }
+
+    @Override
+    public long kneighbor(int k, int node)
+    {
+        return 0;
+    }
+
+    @Override
     public int getNodeCount()
     {
         return (int) sparkseeGraph.countNodes();

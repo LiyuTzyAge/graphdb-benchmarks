@@ -389,6 +389,18 @@ public class TitanGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     }
 
     @Override
+    public long kout(int k, int node)
+    {
+        return 0;
+    }
+
+    @Override
+    public long kneighbor(int k, int node)
+    {
+        return 0;
+    }
+
+    @Override
     public int getNodeCount()
     {
         long nodeCount = new GremlinPipeline<Object, Object>(titanGraph).V().count();

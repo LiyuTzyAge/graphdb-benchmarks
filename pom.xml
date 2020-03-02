@@ -75,6 +75,13 @@
             <!--<scope>test</scope>-->
         <!--</dependency>-->
         <!-- Janusgraph -->
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <version>1.11.733</version>
+        </dependency>
+
         <dependency>
             <groupId>com.carrotsearch</groupId>
             <artifactId>hppc</artifactId>
@@ -132,6 +139,7 @@
             <artifactId>hugegraph-cassandra</artifactId>
             <version>${hugegraph.dist.version}</version>
         </dependency>
+        <!--与client冲突，需手动开启-->
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-api</artifactId>

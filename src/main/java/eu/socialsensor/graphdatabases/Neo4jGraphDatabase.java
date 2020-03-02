@@ -205,6 +205,18 @@ public class Neo4jGraphDatabase extends GraphDatabaseBase<Iterator<Node>, Iterat
         }
     }
 
+    @Override
+    public long kout(int k, int node)
+    {
+        return 0;
+    }
+
+    @Override
+    public long kneighbor(int k, int node)
+    {
+        return 0;
+    }
+
     //TODO can unforced option be pulled into configuration?
     private Transaction beginUnforcedTransaction() {
         final TransactionBuilder builder = ((GraphDatabaseAPI) neo4jGraph).tx().unforced();

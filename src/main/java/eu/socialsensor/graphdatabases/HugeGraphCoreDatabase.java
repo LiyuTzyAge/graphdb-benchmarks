@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.baidu.hugegraph.traversal.algorithm.HugeTraverser;
+import com.baidu.hugegraph.traversal.algorithm.NeighborRankTraverser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -53,6 +55,8 @@ import eu.socialsensor.insert.HugeGraphCoreMassiveInsertion;
 import eu.socialsensor.insert.HugeGraphCoreSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.GraphDatabaseType;
+
+import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.__.out;
 
 public class HugeGraphCoreDatabase extends GraphDatabaseBase<
                                            Iterator<Vertex>,
@@ -230,6 +234,25 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
                                                Directions.OUT, SIMILAR, 5,
                                                -1, 0, -1);
         LOG.debug("{}", path);
+    }
+
+    @Override
+    public long kout(int k, int node)
+    {
+        //原生api
+        HugeTraverser traverser = new HugeTraverser(this.graph);
+        return traverser.kout(IdGenerator.of((Integer)node),Directions.OUT,SIMILAR,k,false,1000000,10000000,10000000).size();
+//        return this.graph.traversal().V(node).repeat(out()).times(k).count().next();
+    }
+
+    @Override
+    public long kneighbor(int k, int node)
+    {
+//        NeighborRankTraverser traverser = new NeighborRankTraverser(this.graph,);
+        //原生api
+        HugeTraverser traverser = new HugeTraverser(this.graph);
+        return traverser.kneighbor(IdGenerator.of((Integer)node),Directions.OUT,SIMILAR,k,1000000,1000000).size();
+//        return this.graph.traversal().V(node).repeat(out(SIMILAR)).times(k).dedup().count().next();
     }
 
     @Override
