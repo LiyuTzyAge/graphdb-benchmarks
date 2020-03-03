@@ -23,7 +23,8 @@ public enum GraphDatabaseType
     SPARKSEE("Sparksee", null, "sparksee"),
     HUGEGRAPH("HugeGraph", null, "hugegraphclient"),
     HUGEGRAPH_CORE("HugeGraphCore", null, "hugegraphcore"),
-    JANUSGRAPH_CORE("JanusGraphCore",null,"janusgraphcore");
+    JANUSGRAPH_CORE("JanusGraphCore",null,"janusgraphcore"),
+    JANUSGRAPH("JanusGraph",null,"janusgraphclient");
 
     private final String backend;
     private final String api;

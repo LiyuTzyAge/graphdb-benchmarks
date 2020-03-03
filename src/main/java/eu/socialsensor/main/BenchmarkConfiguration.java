@@ -66,6 +66,7 @@ public class BenchmarkConfiguration {
     private static final String HUGEGRAPH_GRAPH = "graph";
     private static final String HUGEGRAPH_CONF = "conf";
     private static final String JANUSGRAPH_CONF = "conf";
+    private static final String JANUSGRAPH_CLIENT_CONF = "clientConf";
     private static final Set<String> metricsReporters = new HashSet<String>();
 
     static {
@@ -124,6 +125,7 @@ public class BenchmarkConfiguration {
 
     //janusgraph
     private final String janusgraphConf;
+    private final String janusgraphClientConf;
 
     public String getDynamodbCredentialsFqClassName() {
         return dynamodbCredentialsFqClassName;
@@ -153,6 +155,7 @@ public class BenchmarkConfiguration {
         //janusgraph
         Configuration janusgraph = socialsensor.subset("janusgraph");
         this.janusgraphConf = janusgraph.getString(JANUSGRAPH_CONF);
+        this.janusgraphClientConf = janusgraph.getString(JANUSGRAPH_CLIENT_CONF);
         // metrics
         final Configuration metrics = socialsensor.subset(GraphDatabaseConfiguration.METRICS_NS.getName());
 
@@ -451,5 +454,10 @@ public class BenchmarkConfiguration {
     public String getJanusgraphConf()
     {
         return janusgraphConf;
+    }
+
+    public String getJanusgraphClientConf()
+    {
+        return janusgraphClientConf;
     }
 }

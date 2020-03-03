@@ -28,7 +28,7 @@ public class KneighborsBenchmark extends PermutingBenchmarkBase implements Requi
 
     public KneighborsBenchmark(BenchmarkConfiguration config)
     {
-        super(config, BenchmarkType.K_OUT);
+        super(config, BenchmarkType.K_NEIGHBOR);
         generatedNodes = DatasetFactory.getInstance().getDataset(config.getDataset())
                 .generateRandomNodes(config.getRandomNodes());
         this.k = config.getK();
@@ -41,7 +41,7 @@ public class KneighborsBenchmark extends PermutingBenchmarkBase implements Requi
         graphDatabase.open();
         Stopwatch watch = new Stopwatch();
         watch.start();
-        LOG.info(type+" k-out benchmarks k : "+k+" number of nodes : "+generatedNodes.size());
+        LOG.info(type+" k-neighbor benchmarks k : "+k+" number of nodes : "+generatedNodes.size());
         double value = graphDatabase.kneighbors(k,generatedNodes);
         graphDatabase.shutdown();
         times.get(type).add((double) watch.elapsed(TimeUnit.MILLISECONDS));
