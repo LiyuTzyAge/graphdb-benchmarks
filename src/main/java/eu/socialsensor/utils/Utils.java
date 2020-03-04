@@ -205,6 +205,8 @@ public class Utils
         } else if (GraphDatabaseType.JANUSGRAPH_CORE == type)
         {
             graphDatabase = new JanusGraphCoreDatabase(config, dbStorageDirectory);
+        } else if (GraphDatabaseType.JANUSGRAPH == type) {
+            graphDatabase = new JanusGraphDatabase(config, dbStorageDirectory);
         } else {
             // For safety, will handle the null case
             throw new IllegalArgumentException("Unknown type: " + type == null ? "null" : type.toString());

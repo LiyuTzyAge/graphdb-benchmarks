@@ -3,7 +3,8 @@ package eu.socialsensor.utils;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.driver.Client;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.Result;
@@ -44,7 +45,7 @@ public class JanusGraphClient
     protected JanusGraph janusgraph;
     protected Cluster cluster;
     protected Client client;
-    private static Logger logger = Logger.getLogger(JanusGraphClient.class);
+    private static Logger logger =  LogManager.getLogger();
     /**
      * Constructs a graph app using the given properties.
      * @param fileName location of the properties file
@@ -436,6 +437,11 @@ public class JanusGraphClient
         }
     }
 
+    public void queryStr(String req)
+    {
+        List<Result> resultList = gremlinConsole(req);
+    }
+
     public void createSchema()
     {
         createSchema(createSchemaRequest());
@@ -457,32 +463,32 @@ public class JanusGraphClient
 
     public String addVertexStr(String label,String key,Object value)
     {
-        return "g.addV(\"" + label + "\")" + ".property(\"" + key + "\"," + value + ");";
+        return "graph.addVertex(\"" + label + "\")" + ".property(\"" + key + "\"," + value + ");";
     }
 
-    public String addEdgeStr(String label,int srcId,int destId)
+    public String addVertexAndEdgeStr(String label,int srcId,int destId)
     {
         //g.V(outVertex).as("a").V(inVertex).addE(lable).from("a")
-        //
 //        GraphTraversalSource g = graph.traversal();
 //        g.V().hasLabel("node").has("nodeId", srcId).as("src").V().hasLabel("node").has("nodeId", destId).addE(label).from("src");
-        return "g.V().hasLabel(\"node\").has(\"nodeId\", "+srcId+").as(\"src\").V().hasLabel(\"node\").has(\"nodeId\", "+destId+").addE(\""+label+"\").from(\"src\");";
+//        String req = String.format("v1 = g.V().has(\"nodeId\",%d);if(!v1.hasNext()){v1=graph.addVertex(\"node\");v1.property(\"nodeId\",%d)}else{v1=v1.next()};v2 = g.V().has(\"nodeId\",%d);if(!v2.hasNext()){v2=graph.addVertex(\"node\");v2.property(\"nodeId\",%d)}else{v2=v2.next()};v1.addEdge(\"similar\",v2);", srcId, srcId, destId, destId);
+        String req = String.format("v1 = gg.V().has(\"nodeId\",%d);if(!v1.hasNext()){v1=tx.addVertex(\"node\");v1.property(\"nodeId\",%d)}else{v1=v1.next()};v2 = gg.V().has(\"nodeId\",%d);if(!v2.hasNext()){v2=tx.addVertex(\"node\");v2.property(\"nodeId\",%d)}else{v2=v2.next()};v1.addEdge(\"similar\",v2);", srcId, srcId, destId, destId);
+        return req;
     }
     public static String commit()
     {
-        return "g.tx().commit();";
+        return "tx.commit();";
     }
 
     public void commitRequest(List<String> reqs)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append("GraphTraversalSource g = graph.traversal();");
+        sb.append("tx = graph.buildTransaction().enableBatchLoading().start();");
+        sb.append("gg = tx.traversal();");
         for (String req : reqs) {
             sb.append(req);
         }
         sb.append(commit());
-        sb.append("}");
         createSchema(sb.toString());
     }
 

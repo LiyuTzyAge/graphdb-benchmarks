@@ -316,14 +316,39 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
 //        ResultSet resultSet = this.gremlin.gremlin(query).execute();
 //        Iterator<Result> it = resultSet.iterator();
 //        return ((Number) it.next().getObject()).longValue();
-        return this.hugeClient.traverser().kout(1,Direction.OUT,SIMILAR, 3,false).size();
+//        return this.hugeClient.traverser().kout(node,Direction.OUT,SIMILAR, k,false).size();
+        return kout2(k, node);
     }
 
     @Override
     public long kneighbor(int k, int node)
     {
         //gremlin:g.V(1).emit().repeat(bothE().dedup().store("edges").otherV()).times(1).dedup().aggregate("vertices").bothE().where(without("edges")).as("edge").otherV().where(within("vertices")).select("edge").store("edges").cap("vertices").next()
-        return this.hugeClient.traverser().kneighbor(1, Direction.BOTH, SIMILAR, 3).size();
+//        return this.hugeClient.traverser().kneighbor(node, Direction.BOTH, SIMILAR, k).size();
+        return kneighbor2(k, node);
+    }
+
+    /**
+     * @param k
+     * @param node
+     * @return
+     */
+    public long kout2(int k, int node)
+    {
+        String query = String.format("g.V('%s').repeat(%s()).times(%s).count()",
+                node, "out", k);
+        ResultSet resultSet = this.gremlin.gremlin(query).execute();
+        Iterator<Result> it = resultSet.iterator();
+        return ((Number) it.next().getObject()).longValue();
+    }
+
+    public long kneighbor2(int k, int node)
+    {
+        String query = String.format("g.V('%s').emit().repeat(bothE(SIMILAR).dedup().store(\"edges\").otherV()).times(%d).dedup().aggregate(\"vertices\").bothE().where(without(\"edges\")).as(\"edge\").otherV().where(within(\"vertices\")).select(\"edge\").store(\"edges\").cap(\"vertices\").next().size()",
+                node, k);
+        ResultSet resultSet = this.gremlin.gremlin(query).execute();
+        Iterator<Result> it = resultSet.iterator();
+        return ((Number) it.next().getObject()).longValue();
     }
 
     @Override

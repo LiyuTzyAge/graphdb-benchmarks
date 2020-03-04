@@ -2,12 +2,19 @@ package eu.socialsensor.graphdatabases;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import eu.socialsensor.insert.JanusgraphMassiveInsertion;
+import eu.socialsensor.insert.JanusgraphSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.JanusGraphClient;
 import eu.socialsensor.utils.JanusGraphUtils;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tinkerpop.gremlin.driver.Result;
+import org.apache.tinkerpop.gremlin.driver.ResultSet;
+import org.apache.tinkerpop.gremlin.process.traversal.step.util.BulkSet;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.CloseableIterator;
@@ -20,6 +27,7 @@ import java.util.stream.Collectors;
 import static org.apache.tinkerpop.gremlin.process.traversal.P.within;
 import static org.apache.tinkerpop.gremlin.process.traversal.P.without;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
+
 /**
  *  @author: liyu04
  *  @date: 2020/3/3
@@ -32,9 +40,10 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     public static final String NODE = "node";
     private static final int LIMIT = 100000;
     private final String serverConf;
-    private final String conf ;
+    private final String conf;
     private JanusGraphClient client;
     private static final Logger LOG = LogManager.getLogger();
+
     public JanusGraphDatabase(BenchmarkConfiguration config, File dbStorageDirectory)
     {
         super(GraphDatabaseType.JANUSGRAPH, dbStorageDirectory);
@@ -42,12 +51,50 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
         serverConf = config.getJanusgraphConf();
     }
 
+    //for test
+    private JanusGraphDatabase()
+    {
+        super(GraphDatabaseType.JANUSGRAPH, new File("E://test"));
+        serverConf = "E:/ideahouse/hugeGraph/benchmarks/graphdb-benchmarks/janusgraph.properties";
+        conf = "E:/ideahouse/hugeGraph/benchmarks/graphdb-benchmarks/janus-remote.properties";
+    }
+
+    public static void main(String[] args) throws ConfigurationException
+    {
+//        String inputPath = "E:\\ideahouse\\hugeGraph\\benchmarks\\graphdb-benchmarks\\input.properties";
+//        PropertiesConfiguration inputConf = new PropertiesConfiguration(new File(inputPath));
+//        BenchmarkConfiguration conf = new BenchmarkConfiguration(inputConf);
+//        JanusGraphDatabase database = new JanusGraphDatabase(conf, null);
+
+        JanusGraphDatabase janus = new JanusGraphDatabase();
+        janus.createGraphForMassiveLoad();
+        janus.massiveModeLoading(new File("E:\\test\\Email-Enron.txt"));
+//        janus.createGraphForSingleLoad();
+//        janus.singleModeLoading(new File("E:\\test\\Email-Enron.txt"),new File("E:\\test\\"),1);
+        Vertex vertex = janus.getVertex(0);
+
+//        long kout = janus.kout(3, 0);
+//        long kneighbor = janus.kneighbor(3, 0);
+//        System.out.println("==============" + vertex);
+//        System.out.println("==============kout" + kout);
+//        System.out.println("==============keighbor" + kneighbor);
+        janus.shutdown();
+        System.out.println("=======================");
+    }
+
     private void buildGraphEnv(boolean clear)
     {
         if (clear) {
-            clear();
+            //无效
+//            clear();
         }
-        open();
+        client = new JanusGraphClient(conf);
+        try {
+            client.openGraph();
+        } catch (ConfigurationException e) {
+            LOG.error("connect to janusgraph faild ", e);
+            throw new RuntimeException("connect to janusgraph faild ");
+        }
         createSchema(this.client);
     }
 
@@ -62,23 +109,23 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
 
         s.append("JanusGraphManagement mgmt = graph.openManagement(); ");
         s.append("boolean created = false; ");
-        s.append( "if (mgmt.getVertexLabel(\""+NODE+"\").iterator().hasNext()) { mgmt.rollback(); created = false; } else { ");
-        s.append("VertexLabel v_label = mgmt.makeVertexLabel(\""+NODE+"\").make(); ");
-        s.append("EdgeLabel e_label = mgmt.makeEdgeLabel(\""+SIMILAR+"\").multiplicity(Multiplicity.SIMPLE).make(); ");
-        s.append("PropertyKey nodeid = mgmt.makePropertyKey(\""+NODE_ID+"\").dataType(Integer.class).make(); ");
-        s.append("PropertyKey nodeid = mgmt.makePropertyKey(\""+COMMUNITY+"\").dataType(Integer.class).make(); ");
-        s.append("PropertyKey nodeid = mgmt.makePropertyKey(\""+NODE_COMMUNITY+"\").dataType(Integer.class).make(); ");
-        s.append("mgmt.buildIndex(\"benchmark_node_uniq\", Vertex.class).unique().addKey(\""+NODE_ID+"\").indexOnly(v_label).buildCompositeIndex(); ");
-        s.append("mgmt.buildIndex(\"benchmark_community_uniq\", Vertex.class).addKey(\""+COMMUNITY+"\").indexOnly(v_label).buildCompositeIndex(); ");
-        s.append("mgmt.buildIndex(\"benchmark_node_community_uniq\", Vertex.class).addKey(\""+NODE_COMMUNITY+"\").indexOnly(v_label).buildCompositeIndex(); ");
+        s.append("if (mgmt.getVertexLabel(\"" + NODE + "\").iterator().hasNext()) { mgmt.rollback(); created = false; } else { ");
+        s.append("VertexLabel v_label = mgmt.makeVertexLabel(\"" + NODE + "\").make(); ");
+        s.append("EdgeLabel e_label = mgmt.makeEdgeLabel(\"" + SIMILAR + "\").multiplicity(Multiplicity.SIMPLE).make(); ");
+        s.append("PropertyKey nodeid = mgmt.makePropertyKey(\"" + NODE_ID + "\").dataType(Integer.class).make(); ");
+        s.append("PropertyKey community = mgmt.makePropertyKey(\"" + COMMUNITY + "\").dataType(Integer.class).make(); ");
+        s.append("PropertyKey node_community = mgmt.makePropertyKey(\"" + NODE_COMMUNITY + "\").dataType(Integer.class).make(); ");
+        s.append("mgmt.buildIndex(\"benchmark_node_uniq\", Vertex.class).unique().addKey(nodeid).indexOnly(v_label).buildCompositeIndex(); ");
+        s.append("mgmt.buildIndex(\"benchmark_community_uniq\", Vertex.class).addKey(community).indexOnly(v_label).buildCompositeIndex(); ");
+        s.append("mgmt.buildIndex(\"benchmark_node_community_uniq\", Vertex.class).addKey(node_community).indexOnly(v_label).buildCompositeIndex(); ");
         s.append("mgmt.commit(); created = true; }");
         return s.toString();
     }
 
-        @Override
+    @Override
     public void open()
     {
-        client = new JanusGraphClient(conf);
+        buildGraphEnv(false);
     }
 
     /**
@@ -86,11 +133,11 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
      */
     private void clear()
     {
-            try {
-                JanusGraphUtils.dropGraph(JanusGraphUtils.createGraph(false, serverConf));
-            } catch (BackendException e) {
-                LOG.warn("##janusgraph drop faild ", e.getMessage());
-            }
+        try {
+            JanusGraphUtils.dropGraph(JanusGraphUtils.createGraph(false, serverConf));
+        } catch (Exception e) {
+            LOG.warn("##janusgraph drop faild ", e.getMessage());
+        }
 
     }
 
@@ -103,13 +150,17 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     @Override
     public void massiveModeLoading(File dataPath)
     {
-        //TODO: new
+        JanusgraphMassiveInsertion insertion =
+                new JanusgraphMassiveInsertion(this.client);
+        insertion.createGraph(dataPath, 0);
     }
 
     @Override
     public void singleModeLoading(File dataPath, File resultsPath, int scenarioNumber)
     {
-        //TODO: new
+        JanusgraphSingleInsertion insertion = new JanusgraphSingleInsertion(
+                this.client, resultsPath);
+        insertion.createGraph(dataPath, scenarioNumber);
     }
 
     @Override
@@ -127,7 +178,7 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
         try {
             client.closeGraph();
         } catch (Exception e) {
-            LOG.error("close janusgraph client error ",e);
+            LOG.error("close janusgraph client error ", e);
         }
     }
 
@@ -227,7 +278,6 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     }
 
 
-
     @Override
     public void shortestPath(Vertex fromNode, Integer node)
     {
@@ -235,7 +285,6 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     }
 
     /**
-     * 待测试
      * @param k
      * @param node
      * @return
@@ -243,15 +292,19 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     @Override
     public long kout(int k, int node)
     {
-        return client.getVertexTraversal(NODE,NODE_ID,node).repeat(out(SIMILAR)).times(k).count().next();
+        return client.getVertexTraversal(NODE, NODE_ID, node).repeat(out(SIMILAR)).times(k).count().next();
     }
 
     @Override
     public long kneighbor(int k, int node)
     {
-        //TODO:待测
-        Object value = client.getVertexTraversal(NODE,NODE_ID,node).emit().repeat(bothE(SIMILAR).dedup().store("edges").otherV()).times(1).dedup().aggregate("vertices").bothE().where(without("edges")).as("edge").otherV().where(within("vertices")).select("edge").store("edges").cap("vertices").next();
-        return ((Map<Object,Object>) value).size();
+//        BulkSet value = client.getVertexTraversal(NODE,NODE_ID,node).emit().repeat(bothE(SIMILAR).dedup().store("edges").otherV()).times(k).dedup().aggregate("vertices").bothE().where(without("edges")).as("edge").otherV().where(within("vertices")).select("edge").store("edges").cap("vertices").size();
+//        BulkSet bs = (BulkSet) value;
+        String query = String.format("g.V().has(\"nodeId\",%s).emit().repeat(bothE(\"%s\").dedup().store(\"edges\").otherV()).times(%d).dedup().aggregate(\"vertices\").bothE().where(without(\"edges\")).as(\"edge\").otherV().where(within(\"vertices\")).select(\"edge\").store(\"edges\").cap(\"vertices\").next().size()",
+                node, SIMILAR, k);
+        List<Result> resultList = client.gremlinConsole(query);
+        System.out.println("======="+resultList);
+        return resultList.get(0).getLong();
     }
 
     @Override
@@ -275,7 +328,7 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     public double getNodeWeight(int nodeId)
     {
         // NOTE: this method won't be called
-        return client.getVertexTraversal(NODE,NODE_ID,nodeId).out(SIMILAR).count().next();
+        return client.getVertexTraversal(NODE, NODE_ID, nodeId).out(SIMILAR).count().next();
     }
 
     @Override
@@ -299,9 +352,9 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     public Set<Integer> getCommunitiesConnectedToNodeCommunities(int nodeCommunities)
     {
         Set<Integer> communities = new HashSet<>();
-        List<Vertex> vertices = client.g().V().hasLabel(NODE).has(NODE_COMMUNITY,nodeCommunities).toList();
+        List<Vertex> vertices = client.g().V().hasLabel(NODE).has(NODE_COMMUNITY, nodeCommunities).toList();
         for (Vertex v : vertices) {
-            for (Object community : client.getOutVerties(v,SIMILAR,COMMUNITY)) {
+            for (Object community : client.getOutVerties(v, SIMILAR, COMMUNITY)) {
                 communities.add((Integer) community);
             }
         }
@@ -312,7 +365,7 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     public Set<Integer> getNodesFromCommunity(int community)
     {
         Set<Integer> nodes = new HashSet<>();
-        for (Object v : client.getVertexTraversal(NODE,COMMUNITY, community).values(NODE_ID).toList()) {
+        for (Object v : client.getVertexTraversal(NODE, COMMUNITY, community).values(NODE_ID).toList()) {
             nodes.add((Integer) v);
         }
         return nodes;
@@ -322,7 +375,7 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     public Set<Integer> getNodesFromNodeCommunity(int nodeCommunity)
     {
         Set<Integer> nodes = new HashSet<>();
-        for (Object v : client.getVertexTraversal(NODE,NODE_COMMUNITY, nodeCommunity).values(NODE_ID).toList()) {
+        for (Object v : client.getVertexTraversal(NODE, NODE_COMMUNITY, nodeCommunity).values(NODE_ID).toList()) {
             nodes.add((Integer) v);
         }
         return nodes;
@@ -332,9 +385,9 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     public double getEdgesInsideCommunity(int nodeCommunity, int communityNodes)
     {
         double edges = 0;
-        Iterable<Vertex> vertices = client.getVertexTraversal(NODE,NODE_COMMUNITY,
+        Iterable<Vertex> vertices = client.getVertexTraversal(NODE, NODE_COMMUNITY,
                 nodeCommunity).toList();
-        Iterable<Vertex> comVertices = client.getVertexTraversal(NODE,COMMUNITY,
+        Iterable<Vertex> comVertices = client.getVertexTraversal(NODE, COMMUNITY,
                 communityNodes).toList();
         for (Vertex vertex : vertices) {
             for (Vertex v : client.g().V(vertex).out(SIMILAR).toList()) {
@@ -350,10 +403,10 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     public double getCommunityWeight(int community)
     {
         double communityWeight = 0;
-        List<Vertex> vertices = client.getVertexTraversal(NODE,COMMUNITY, community).toList();
+        List<Vertex> vertices = client.getVertexTraversal(NODE, COMMUNITY, community).toList();
         if (vertices.size() > 1) {
             for (Vertex vertex : vertices) {
-                communityWeight += client.getNodeOutDegree(vertex,SIMILAR);
+                communityWeight += client.getNodeOutDegree(vertex, SIMILAR);
             }
         }
         return communityWeight;
@@ -363,8 +416,8 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     public double getNodeCommunityWeight(int nodeCommunity)
     {
         double nodeCommunityWeight = 0;
-        for (Vertex v : client.getVertexTraversal(NODE,NODE_COMMUNITY, nodeCommunity).toList()) {
-            nodeCommunityWeight += client.getNodeOutDegree(v,SIMILAR);
+        for (Vertex v : client.getVertexTraversal(NODE, NODE_COMMUNITY, nodeCommunity).toList()) {
+            nodeCommunityWeight += client.getNodeOutDegree(v, SIMILAR);
         }
         return nodeCommunityWeight;
     }
@@ -372,7 +425,7 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     @Override
     public void moveNode(int from, int to)
     {
-        Iterable<Vertex> vertices = client.getVertexTraversal(NODE,NODE_COMMUNITY, from).toList();
+        Iterable<Vertex> vertices = client.getVertexTraversal(NODE, NODE_COMMUNITY, from).toList();
         for (Vertex v : vertices) {
             client.addOrUpdateVertex(v, ImmutableMap.of(COMMUNITY, to));
         }
@@ -391,7 +444,7 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
         Map<Integer, Integer> initCommunities = new HashMap<>();
         int communityCounter = 0;
         for (Vertex v : client.g().V().hasLabel(NODE).toList()) {
-            int communityId = (int) client.getVertexProperty(v,COMMUNITY);
+            int communityId = (int) client.getVertexProperty(v, COMMUNITY);
             if (!initCommunities.containsKey(communityId)) {
                 initCommunities.put(communityId, communityCounter);
                 communityCounter++;
@@ -444,6 +497,6 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     @Override
     public boolean nodeExists(int nodeId)
     {
-        return client.getVertexTraversal(NODE,NODE_ID,nodeId).hasNext();
+        return client.getVertexTraversal(NODE, NODE_ID, nodeId).hasNext();
     }
 }

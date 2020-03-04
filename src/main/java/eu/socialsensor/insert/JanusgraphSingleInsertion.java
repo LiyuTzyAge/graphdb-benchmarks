@@ -19,7 +19,7 @@ import java.io.File;
 public class JanusgraphSingleInsertion  extends InsertionBase<Vertex>
 {
     private final JanusGraphClient client;
-    protected JanusgraphSingleInsertion(JanusGraphClient client, File resultsPath)
+    public JanusgraphSingleInsertion(JanusGraphClient client, File resultsPath)
     {
         super(GraphDatabaseType.JANUSGRAPH, resultsPath);
         this.client = client;

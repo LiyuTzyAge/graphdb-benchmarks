@@ -26,12 +26,12 @@ public class JanusgraphMassiveInsertion extends InsertionBase<Integer>
     private ExecutorService pool = Executors.newFixedThreadPool(8);
     private Set<Integer> vertices = new HashSet<>();
 
-    private static final int VERTEX_BATCH_NUMBER = 500;
-    private static final int EDGE_BATCH_NUMBER = 500;
+//    private static final int VERTEX_BATCH_NUMBER = 500;
+    private static final int EDGE_BATCH_NUMBER = 100;
 
-    private List<String> vertexList = new ArrayList<>(VERTEX_BATCH_NUMBER);
+//    private List<String> vertexList = new ArrayList<>(VERTEX_BATCH_NUMBER);
     private List<String> edgeList = new ArrayList<>(EDGE_BATCH_NUMBER);
-    protected JanusgraphMassiveInsertion(JanusGraphClient client)
+    public JanusgraphMassiveInsertion(JanusGraphClient client)
     {
         super(GraphDatabaseType.JANUSGRAPH, null);
         this.client = client;
@@ -41,47 +41,51 @@ public class JanusgraphMassiveInsertion extends InsertionBase<Integer>
     protected Integer getOrCreate(String value)
     {
         Integer v = Integer.valueOf(value);
-        if (!this.vertices.contains(v)) {
-            this.vertices.add(v);
-            this.vertexList.add(client.addVertexStr(JanusGraphDatabase.NODE, JanusGraphDatabase.NODE_ID, v));
-        }
+//        if (!this.vertices.contains(v)) {
+//            this.vertices.add(v);
+//            this.vertexList.add(client.addVertexStr(JanusGraphDatabase.NODE, JanusGraphDatabase.NODE_ID, v));
+//        }
 
-        if (this.vertexList.size() >= VERTEX_BATCH_NUMBER) {
-            batchcommitVertex();
-        }
+//        if (this.vertexList.size() >= VERTEX_BATCH_NUMBER) {
+//            batchcommitVertex();
+//        }
         return v;
     }
 
     @Override
     protected void relateNodes(Integer src, Integer dest)
     {
-        this.edgeList.add(client.addEdgeStr(JanusGraphDatabase.SIMILAR,src,dest));
+        this.edgeList.add(client.addVertexAndEdgeStr(JanusGraphDatabase.SIMILAR,src,dest));
         if (this.edgeList.size() >= EDGE_BATCH_NUMBER) {
             batchcommitEdge();
         }
     }
 
-    public void batchcommitVertex() {
-        List<String> list = this.vertexList;
-        this.vertexList = new ArrayList<>(VERTEX_BATCH_NUMBER);
-        this.pool.submit(() -> {
-            client.commitRequest(list);
-        });
-    }
+//    private void batchcommitVertex() {
+//        List<String> list = this.vertexList;
+//        this.vertexList = new ArrayList<>(VERTEX_BATCH_NUMBER);
+//        this.pool.submit(() -> {
+//            client.commitRequest(list);
+//        });
+//    }
 
     public void batchcommitEdge() {
         List<String> list = this.edgeList;
         this.edgeList = new ArrayList<>(EDGE_BATCH_NUMBER);
         this.pool.submit(() -> {
-            this.client.commitRequest(list);
+            try {
+                this.client.commitRequest(list);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
 
     @Override
     protected void post() {
-        if (this.vertexList.size() > 0) {
-            batchcommitVertex();
-        }
+//        if (this.vertexList.size() > 0) {
+//            batchcommitVertex();
+//        }
         if (this.edgeList.size() > 0) {
             batchcommitEdge();
         }
