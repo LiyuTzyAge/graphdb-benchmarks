@@ -156,11 +156,11 @@
             <version>${hugegraph.dist.version}</version>
         </dependency>
         <!--与client冲突，需手动开启-->
-        <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
-            <artifactId>hugegraph-api</artifactId>
-            <version>${hugegraph.dist.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.baidu.hugegraph</groupId>-->
+            <!--<artifactId>hugegraph-api</artifactId>-->
+            <!--<version>${hugegraph.dist.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-client</artifactId>

@@ -56,6 +56,7 @@ import eu.socialsensor.insert.HugeGraphMassiveInsertion;
 import eu.socialsensor.insert.HugeGraphSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.GraphDatabaseType;
+import org.parboiled.common.ImmutableList;
 
 public class HugeGraphDatabase extends GraphDatabaseBase<
              Iterator<HugeVertex>,
@@ -79,6 +80,17 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
         super(GraphDatabaseType.HUGEGRAPH, dbStorageDirectoryIn);
         this.conf = config;
     }
+
+    private HugeGraphDatabase()
+    {
+        super(GraphDatabaseType.HUGEGRAPH, new File("E://test"));
+        this.hugeClient = new HugeClient("http://10.95.109.145:18080",
+                "hugegraph",
+                CLIENT_TIMEOUT);
+        this.gremlin = this.hugeClient.gremlin();
+        conf = null;
+    }
+
 
     @Override
     public HugeVertex getOtherVertexFromEdge(HugeEdge edge,
@@ -335,7 +347,7 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
      */
     public long kout2(int k, int node)
     {
-        String query = String.format("g.V('%s').repeat(%s()).times(%s).count()",
+        String query = String.format("g.V(%d).repeat(%s()).times(%s).count()",
                 node, "out", k);
         ResultSet resultSet = this.gremlin.gremlin(query).execute();
         Iterator<Result> it = resultSet.iterator();
@@ -344,8 +356,8 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
 
     public long kneighbor2(int k, int node)
     {
-        String query = String.format("g.V('%s').emit().repeat(bothE(SIMILAR).dedup().store(\"edges\").otherV()).times(%d).dedup().aggregate(\"vertices\").bothE().where(without(\"edges\")).as(\"edge\").otherV().where(within(\"vertices\")).select(\"edge\").store(\"edges\").cap(\"vertices\").next().size()",
-                node, k);
+        String query = String.format("g.V(%d).emit().repeat(bothE(\"%s\").dedup().store(\"edges\").otherV()).times(%d).dedup().aggregate(\"vertices\").bothE().where(without(\"edges\")).as(\"edge\").otherV().where(within(\"vertices\")).select(\"edge\").store(\"edges\").cap(\"vertices\").next().size()",
+                node, SIMILAR,k);
         ResultSet resultSet = this.gremlin.gremlin(query).execute();
         Iterator<Result> it = resultSet.iterator();
         return ((Number) it.next().getObject()).longValue();
@@ -577,7 +589,25 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
 
     public static void main(String[] args)
     {
-        test();
+        test1();
+    }
+
+    public static void test1()
+    {
+        HugeGraphDatabase client = new HugeGraphDatabase();
+//        Vertex vertex1 = new Vertex(HugeGraphDatabase.NODE);
+//        vertex1.id(0);
+//        vertex1.property(NODE_ID, 0);
+//        Vertex vertex2 = new Vertex(HugeGraphDatabase.NODE);
+//        vertex2.id(1);
+//        vertex2.property(NODE_ID, 1);
+//        client.hugeClient.graph().addVertices(ImmutableList.of(vertex1, vertex2));
+//        client.createGraphForMassiveLoad();
+//        client.massiveModeLoading(new File("E:\\360\\graph研究\\hugegraph\\测试数据\\Email-Enron.txt"));
+        long kout = client.kout(3, 0);
+        long kneighbor = client.kneighbor(3, 0);
+        System.out.println("=====" + kout);
+        System.out.println("====="+kneighbor);
     }
     public static void test()
     {

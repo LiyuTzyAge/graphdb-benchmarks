@@ -59,6 +59,7 @@ public class HugeGraphMassiveInsertion extends InsertionBase<Integer> {
             this.vertices.add(v);
             Vertex vertex = new Vertex(HugeGraphDatabase.NODE);
             vertex.id(v);
+            vertex.property(HugeGraphDatabase.NODE_ID, v);
             this.vertexList.add(vertex);
         }
 
