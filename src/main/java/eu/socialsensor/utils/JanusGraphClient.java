@@ -390,7 +390,7 @@ public class JanusGraphClient
         return traversal;
     }
 
-    private <U> U replaceProperty(GraphTraversal<Vertex,U> traversal, Map<String,Object> properties){
+    public <U> U replaceProperty(GraphTraversal<Vertex,U> traversal, Map<String,Object> properties){
         if (traversal == null) {
             return null;
         }

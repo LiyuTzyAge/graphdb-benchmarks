@@ -31,7 +31,10 @@ public class JanusgraphSingleInsertion  extends InsertionBase<Vertex>
         Vertex v = null;
         if (StringUtils.isNotBlank(value)) {
             Integer id = Integer.valueOf(value);
-            v = client.addOrUpdateVertex(JanusGraphDatabase.NODE_ID, JanusGraphDatabase.NODE, ImmutableMap.of(JanusGraphDatabase.NODE_ID, id));
+            v = client.getVertex(JanusGraphDatabase.NODE, JanusGraphDatabase.NODE_ID, id);
+            if (v == null) {
+                v = client.replaceProperty(client.g().addV(JanusGraphDatabase.NODE), ImmutableMap.of(JanusGraphDatabase.NODE_ID, id));
+            }
         }
         return v;
     }

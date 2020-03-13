@@ -26,13 +26,14 @@ import static eu.socialsensor.graphdatabases.JanusGraphCoreDatabase.createSchema
  *
  * @Description:
  */
-public class JanusGraphCoreMassiveInsertion extends InsertionBase<Integer>
+public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex>
 {
     private final JanusGraph graph;
 //    private final JanusGraphTransaction tx;
     private Set<Integer> allVertices = new HashSet<>();
-    private volatile List<Integer> vertices;
-    private volatile List<Pair<Integer, Integer>> edges;
+    private Map<Integer,Vertex> allVerticesMap = new HashMap<>(1000000);
+//    private volatile List<Integer> vertices;
+    private volatile List<Pair<Vertex, Vertex>> edges;
     private static final int EDGE_BATCH_NUMBER = 500;
     private ExecutorService pool = Executors.newFixedThreadPool(8);
     private static final Logger LOG = LogManager.getLogger();
@@ -51,23 +52,28 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Integer>
      * @return
      */
     @Override
-    protected Integer getOrCreate(String value)
+    protected Vertex getOrCreate(String value)
     {
+        Vertex vertex;
         Integer v = Integer.valueOf(value.trim());
-        if (!this.allVertices.contains(v)) {
-            this.allVertices.add(v);
-            this.vertices.add(v);
+        if (!this.allVerticesMap.containsKey(v)) {
+            //this.vertices.add(v);
+            vertex = JanusGraphUtils.addVertex(this.graph, v.longValue());
+            this.allVerticesMap.put(v, vertex);
+        } else {
+            vertex = allVerticesMap.get(v);
         }
-        return v;
+
+        return vertex;
     }
 
     private void reset() {
-        this.vertices = new ArrayList<>();
+//        this.vertices = new ArrayList<>();
         this.edges = new ArrayList<>(EDGE_BATCH_NUMBER);
     }
 
     @Override
-    protected void relateNodes(Integer src, Integer dest)
+    protected void relateNodes(Vertex src, Vertex dest)
     {
         this.edges.add(Pair.of(src, dest));
         if (this.edges.size() >= EDGE_BATCH_NUMBER) {
@@ -77,37 +83,28 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Integer>
     }
 
     private void batchCommit() {
-        List<Integer> vs = this.vertices;
-        List<Pair<Integer, Integer>> es = this.edges;
+//        List<Integer> vs = this.vertices;
+        List<Pair<Vertex, Vertex>> es = this.edges;
 
         this.pool.submit(() -> {
             try {
-//            int count = 0;
-//            int ecount = 0;
-                for (Integer v : vs) {
-
-//                if (JanusGraphUtils.getVertex(this.graph,v.longValue()) == null) {
-//                    JanusGraphUtils.addVertex(this.graph,v.longValue());
-//                    count++;
+//                for (Integer v : vs) {
+//                    if (v < 20) {
+//                        System.out.println("====commmit===" + v);
+//                    }
+//                    //批量模式无法使用getVertex，一致性检查被关闭
+//                    JanusGraphUtils.addVertex(this.graph, v.longValue());
 //                }
-                    if (v < 20) {
-                        System.out.println("====commmit===" + v);
-                    }
-                    //批量模式无法使用getVertex，一致性检查被关闭
-                    JanusGraphUtils.addVertex(this.graph, v.longValue());
-//                count++;
+//                Vertex source;
+//                Vertex target;
+                for (Pair<Vertex, Vertex> e : es) {
+                    //并发情况下可能 vertex还未写入，产生NullPointException,如果写入够快则不会
+                    //可以先写点再写边
+//                    source = JanusGraphUtils.getVertex(this.graph, e.getLeft().longValue());
+//                    target = JanusGraphUtils.getVertex(this.graph, e.getRight().longValue());
+//                    source.addEdge(JanusGraphCoreDatabase.SIMILAR, target);
+                    e.getLeft().addEdge(JanusGraphCoreDatabase.SIMILAR, e.getRight());
                 }
-                Vertex source;
-                Vertex target;
-                for (Pair<Integer, Integer> e : es) {
-                    //TODO:待验证
-                    source = JanusGraphUtils.getVertex(this.graph, e.getLeft().longValue());
-                    target = JanusGraphUtils.getVertex(this.graph, e.getRight().longValue());
-                    source.addEdge(JanusGraphCoreDatabase.SIMILAR, target);
-//                ecount++;
-                }
-//            long vcount = this.graph.traversal().V().count().next();
-//            System.out.println("==debug==:v_count:" + count + "e_count:" + ecount+"all vertex:"+vcount);
                 this.graph.tx().commit();
             } catch (Exception e) {
                 LOG.error("massive insert error",e);
@@ -167,7 +164,7 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Integer>
             }
             testGraph.getOrCreate(String.valueOf(v_src));
             testGraph.getOrCreate(String.valueOf(v_dest));
-            testGraph.relateNodes(v_src,v_dest);
+//            testGraph.relateNodes(v_src,v_dest);
         }
         testGraph.post();
         System.out.println("end");

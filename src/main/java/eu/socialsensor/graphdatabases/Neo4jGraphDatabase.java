@@ -2,9 +2,7 @@ package eu.socialsensor.graphdatabases;
 
 import com.google.common.collect.Iterables;
 
-import eu.socialsensor.insert.Insertion;
-import eu.socialsensor.insert.Neo4jMassiveInsertion;
-import eu.socialsensor.insert.Neo4jSingleInsertion;
+import eu.socialsensor.insert.*;
 import eu.socialsensor.main.BenchmarkingException;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.Utils;
@@ -144,6 +142,15 @@ public class Neo4jGraphDatabase extends GraphDatabaseBase<Iterator<Node>, Iterat
     {
         Insertion neo4jMassiveInsertion = new Neo4jMassiveInsertion(this.inserter);
         neo4jMassiveInsertion.createGraph(dataPath, 0 /* scenarioNumber */);
+    }
+
+    @Override
+    public void massiveModeLoading(File dataPath, CustomData customData)
+    {
+        Neo4jMassiveInsertion neo4jMassiveInsertion =
+                new Neo4jMassiveInsertion(this.inserter);
+        customData.createGraph(
+                dataPath,neo4jMassiveInsertion,0);
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import eu.socialsensor.insert.Custom;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 
@@ -127,6 +128,11 @@ public class BenchmarkConfiguration {
     private final String janusgraphConf;
     private final String janusgraphClientConf;
 
+    //custmon dataset
+    private final boolean isCustomDataset;
+    private final File customDataset;
+    private final Class<Custom> customDataClass;
+
     public String getDynamodbCredentialsFqClassName() {
         return dynamodbCredentialsFqClassName;
     }
@@ -156,6 +162,25 @@ public class BenchmarkConfiguration {
         Configuration janusgraph = socialsensor.subset("janusgraph");
         this.janusgraphConf = janusgraph.getString(JANUSGRAPH_CONF);
         this.janusgraphClientConf = janusgraph.getString(JANUSGRAPH_CLIENT_CONF);
+        //custom dataset
+        Configuration custom = socialsensor.subset("customDataset");
+        this.isCustomDataset = custom.getBoolean("on", false);
+        if (this.isCustomDataset) {
+            this.customDataset = new File(custom.getString(custom.getString("dataset")));
+            if (!this.customDataset.exists()) {
+                throw new RuntimeException(String.format("custom dataset %s is not found !", custom.getString("dataset")));
+            }
+            String className = custom.getString("class");
+            try {
+                this.customDataClass = (Class<Custom>) this.getClass().getClassLoader().loadClass(className);
+            } catch (ClassNotFoundException|ClassCastException e) {
+                throw new RuntimeException(String.format("custom class %s is not found !", className), e);
+            }
+        } else {
+            this.customDataset = null;
+            this.customDataClass = null;
+        }
+
         // metrics
         final Configuration metrics = socialsensor.subset(GraphDatabaseConfiguration.METRICS_NS.getName());
 
@@ -459,5 +484,20 @@ public class BenchmarkConfiguration {
     public String getJanusgraphClientConf()
     {
         return janusgraphClientConf;
+    }
+
+    public boolean isCustomDataset()
+    {
+        return isCustomDataset;
+    }
+
+    public File getCustomDataset()
+    {
+        return customDataset;
+    }
+
+    public Class<Custom> getCustomDataClass()
+    {
+        return customDataClass;
     }
 }

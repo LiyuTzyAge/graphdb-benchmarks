@@ -1,6 +1,7 @@
 package eu.socialsensor.utils;
 
 import eu.socialsensor.graphdatabases.JanusGraphCoreDatabase;
+import eu.socialsensor.graphdatabases.JanusGraphDatabase;
 import jnr.ffi.annotations.In;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.__.out;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.has;
@@ -53,7 +55,8 @@ public class JanusGraphUtils
         } else {
             configuration.setProperty("storage.batch-loading", "false");
         }
-        configuration.setProperty("graph.set-vertex-id","true");
+        //全局配置，并且一旦初始化不可修改
+        configuration.setProperty("graph.set-vertex-id","false");
         return JanusGraphFactory.open(configuration);
     }
 
@@ -66,6 +69,43 @@ public class JanusGraphUtils
                     e.getMessage()));
         }
 
+    }
+
+    public static Object createLabel(JanusGraphManagement mgmt,String label,boolean vertex)
+    {
+        Object l;
+        if (vertex) {
+            l = !mgmt.containsVertexLabel(label) ? mgmt.makeVertexLabel(label).make() : null;
+        } else {
+            l = !mgmt.containsEdgeLabel(label) ? mgmt.makeEdgeLabel(label).make() : null;
+        }
+        return l;
+    }
+
+    public static PropertyKey getOrCreatePropertyKey(JanusGraphManagement mgmt, String name, Class<?> clz, Cardinality car) {
+        PropertyKey key = mgmt.getPropertyKey(name);
+        if (key != null) {
+            return key;
+        }
+        return mgmt.makePropertyKey(name).dataType(clz).cardinality(car).make();
+    }
+
+    public static void buildVertexCompositeIndex(JanusGraphManagement mgmt, String indexName, boolean isUniq, VertexLabel label, PropertyKey... keys) {
+        if (mgmt.containsGraphIndex(indexName)) {
+            LOG.warn(indexName + " already exists");
+            return;
+        }
+        JanusGraphManagement.IndexBuilder builder = mgmt.buildIndex(indexName, Vertex.class);
+        if (isUniq) {
+            builder  = builder.unique();
+        }
+        for (PropertyKey k : keys) {
+            builder = builder.addKey(k);
+        }
+        if (label != null) {
+            builder = builder.indexOnly(label);
+        }
+        builder.buildCompositeIndex();
     }
 
     /**
@@ -87,15 +127,14 @@ public class JanusGraphUtils
     }
 
     /**
-     * 已测(不适用与批量模式，批量模式会自动为不存在的id分配点，因为关闭了一致性检查)
+     *
      * @param graph
      * @param id
      * @return
      */
     public static Vertex getVertex(JanusGraph graph, Long id)
     {
-        Iterator<Vertex> vertices = graph.vertices(toVertexId(graph, id));
-        return vertices.hasNext() ? vertices.next() : null;
+        return getVertexAutoId(graph, id);
     }
 
     /**
@@ -107,9 +146,51 @@ public class JanusGraphUtils
      */
     public static Vertex addVertex(JanusGraph graph, Long id)
     {
+        return addVertexAutoId(graph, id);
+    }
+
+    /**
+     * 已测(不适用于批量模式，批量模式下无论id是否存在都会返回vertex)
+     * @param graph
+     * @param id
+     * @return
+     */
+    private static Vertex getVertexCustomId(JanusGraph graph, Long id)
+    {
+        Iterator<Vertex> vertices = graph.vertices(toVertexId(graph, id));
+        return vertices.hasNext() ? vertices.next() : null;
+    }
+
+    private static Vertex addVertexCustomId(JanusGraph graph, Long id)
+    {
         Vertex v = graph.addVertex(T.label, JanusGraphCoreDatabase.NODE, T.id, toVertexId(graph, id));
         v.property(JanusGraphCoreDatabase.NODE_ID, id.intValue());
         return v;
+    }
+
+    /**
+     * janus自动创建id
+     * @param graph
+     * @param id
+     * @return
+     */
+    private static Vertex addVertexAutoId(JanusGraph graph,Long id)
+    {
+        JanusGraphVertex v = graph.addVertex(JanusGraphCoreDatabase.NODE);
+        v.property(JanusGraphCoreDatabase.NODE_ID, id.intValue());
+        return v;
+    }
+
+    /**
+     * 根据index查找vertex，因为janus自动创建id，不知道id确定值
+     * @param graph
+     * @param id
+     * @return
+     */
+    private static Vertex getVertexAutoId(JanusGraph graph, Long id)
+    {
+        Optional<Vertex> vertex = graph.traversal().V().has(JanusGraphCoreDatabase.NODE_ID, id).tryNext();
+        return vertex.orElse(null);
     }
 
     /**
@@ -134,7 +215,7 @@ public class JanusGraphUtils
 
     public static void main(String[] args) throws BackendException
     {
-        JanusGraph graph = JanusGraphUtils.createGraph(false, "E:\\ideahouse\\hugeGraph\\benchmarks\\graphdb-benchmarks\\janusgraph.properties");
+        JanusGraph graph = JanusGraphUtils.createGraph(true, "E:\\ideahouse\\hugeGraph\\benchmarks\\graphdb-benchmarks\\janusgraph.properties");
 //        Vertex vertex1 = graph.vertices(256L).next();
 //        shortestPath(graph, vertex1, 18944);
 //        System.exit(1);
@@ -143,15 +224,15 @@ public class JanusGraphUtils
 //        g.withComputer();
 //        Path nodeId = g.V(256L).shortestPath().with(ShortestPath.edges, Direction.OUT).with(ShortestPath.target, has("nodeId", 2)).next();
 //        System.out.println(nodeId.toString());
-        Vertex v1 = getVertex(graph, 1L);
+        Vertex v1 = getVertex(graph, 2L);
         if (null != v1) {
             System.out.println("====================v1 exists");
         }else {
             System.out.println("====================v1 not exists");
-            addVertex(graph, 1L);
+            addVertex(graph, 2L);
         }
 
-        if (null != getVertex(graph, 1L)) {
+        if (null != getVertex(graph, 2L)) {
             System.out.println("==============================v1 exists");
         }else {
             System.out.println("====================v1 not exists");

@@ -30,6 +30,8 @@ import java.util.Set;
 
 import com.baidu.hugegraph.traversal.algorithm.HugeTraverser;
 import com.baidu.hugegraph.traversal.algorithm.NeighborRankTraverser;
+import eu.socialsensor.insert.CustomData;
+import eu.socialsensor.insert.InsertionBase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -169,6 +171,14 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
         HugeGraphCoreMassiveInsertion insertion =
                 new HugeGraphCoreMassiveInsertion(this.graph);
         insertion.createGraph(dataPath, 0);
+    }
+
+    @Override
+    public void massiveModeLoading(File dataPath, CustomData customData)
+    {
+        HugeGraphCoreMassiveInsertion insertion =
+                new HugeGraphCoreMassiveInsertion(this.graph);
+        customData.createGraph(dataPath, insertion, 0);
     }
 
     @Override

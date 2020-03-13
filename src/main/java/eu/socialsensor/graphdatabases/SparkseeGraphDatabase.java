@@ -24,9 +24,7 @@ import com.sparsity.sparksee.gdb.Sparksee;
 import com.sparsity.sparksee.gdb.SparkseeConfig;
 import com.sparsity.sparksee.gdb.Value;
 
-import eu.socialsensor.insert.Insertion;
-import eu.socialsensor.insert.SparkseeMassiveInsertion;
-import eu.socialsensor.insert.SparkseeSingleInsertion;
+import eu.socialsensor.insert.*;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.BenchmarkingException;
 import eu.socialsensor.main.GraphDatabaseType;
@@ -154,6 +152,12 @@ public class SparkseeGraphDatabase extends GraphDatabaseBase<ObjectsIterator, Ob
     {
         Insertion sparkseeMassiveInsertion = new SparkseeMassiveInsertion(session);
         sparkseeMassiveInsertion.createGraph(dataPath, 0 /* scenarioNumber */);
+    }
+
+    @Override
+    public void massiveModeLoading(File dataPath, CustomData customData)
+    {
+        throw new RuntimeException("not support !");
     }
 
     @Override

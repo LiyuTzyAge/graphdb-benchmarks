@@ -2,6 +2,8 @@ package eu.socialsensor.graphdatabases;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import eu.socialsensor.insert.CustomData;
+import eu.socialsensor.insert.InsertionBase;
 import eu.socialsensor.insert.JanusgraphMassiveInsertion;
 import eu.socialsensor.insert.JanusgraphSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
@@ -9,23 +11,15 @@ import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.JanusGraphClient;
 import eu.socialsensor.utils.JanusGraphUtils;
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.driver.Result;
-import org.apache.tinkerpop.gremlin.driver.ResultSet;
-import org.apache.tinkerpop.gremlin.process.traversal.step.util.BulkSet;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.CloseableIterator;
-import org.janusgraph.diskstorage.BackendException;
-
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.apache.tinkerpop.gremlin.process.traversal.P.within;
-import static org.apache.tinkerpop.gremlin.process.traversal.P.without;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
 /**
@@ -156,9 +150,18 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     }
 
     @Override
+    public void massiveModeLoading(File dataPath, CustomData customData)
+    {
+        JanusgraphMassiveInsertion insertion =
+                new JanusgraphMassiveInsertion(this.client);
+        customData.createGraph(dataPath, insertion, 0);
+    }
+
+    @Override
     public void singleModeLoading(File dataPath, File resultsPath, int scenarioNumber)
     {
-        JanusgraphSingleInsertion insertion = new JanusgraphSingleInsertion(
+        JanusgraphSingleInsertion insertion =
+                new JanusgraphSingleInsertion(
                 this.client, resultsPath);
         insertion.createGraph(dataPath, scenarioNumber);
     }

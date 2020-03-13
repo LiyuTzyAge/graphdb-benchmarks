@@ -1,5 +1,7 @@
 package eu.socialsensor.graphdatabases;
 
+import eu.socialsensor.insert.CustomData;
+import eu.socialsensor.insert.InsertionBase;
 import eu.socialsensor.insert.JanusGraphCoreMassiveInsertion;
 import eu.socialsensor.insert.JanusGraphCoreSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
@@ -23,6 +25,7 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.socialsensor.utils.JanusGraphUtils.*;
 import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.__.out;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.has;
 
@@ -174,6 +177,13 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     {
         JanusGraphCoreMassiveInsertion ji = new JanusGraphCoreMassiveInsertion(this.graph);
         ji.createGraph(dataPath,0);
+    }
+
+    @Override
+    public void massiveModeLoading(File dataPath, CustomData customData)
+    {
+        JanusGraphCoreMassiveInsertion ji = new JanusGraphCoreMassiveInsertion(this.graph);
+        customData.createGraph(dataPath, ji, 0);
     }
 
     @Override
@@ -592,31 +602,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         mgmt.commit();
     }
 
-    private static PropertyKey getOrCreatePropertyKey(JanusGraphManagement mgmt, String name, Class<?> clz, Cardinality car) {
-        PropertyKey key = mgmt.getPropertyKey(name);
-        if (key != null) {
-            return key;
-        }
-        return mgmt.makePropertyKey(name).dataType(clz).cardinality(car).make();
-    }
 
-    private static void buildVertexCompositeIndex(JanusGraphManagement mgmt, String indexName, boolean isUniq, VertexLabel label, PropertyKey... keys) {
-        if (mgmt.containsGraphIndex(indexName)) {
-            LOG.warn(indexName + " already exists");
-            return;
-        }
-        JanusGraphManagement.IndexBuilder builder = mgmt.buildIndex(indexName, Vertex.class);
-        if (isUniq) {
-            builder  = builder.unique();
-        }
-        for (PropertyKey k : keys) {
-            builder = builder.addKey(k);
-        }
-        if (label != null) {
-            builder = builder.indexOnly(label);
-        }
-        builder.buildCompositeIndex();
-    }
     public void close(){
         if (transaction != null) transaction.close();
         if(graph != null) graph.close();

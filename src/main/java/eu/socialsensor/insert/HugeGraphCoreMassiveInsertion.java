@@ -19,15 +19,15 @@
 
 package eu.socialsensor.insert;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import eu.socialsensor.utils.TaiShiDataUtils;
+import eu.socialsensor.utils.Utils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.tinkerpop.gremlin.structure.T;
 
 import com.baidu.hugegraph.HugeGraph;
@@ -37,17 +37,20 @@ import com.baidu.hugegraph.structure.HugeVertex;
 
 import eu.socialsensor.graphdatabases.HugeGraphDatabase;
 import eu.socialsensor.main.GraphDatabaseType;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer> {
+public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String> {
 
     private static final int EDGE_BATCH_NUMBER = 500;
 
     private ExecutorService pool = Executors.newFixedThreadPool(8);
 
     private Set<Integer> allVertices = new HashSet<>();
-
+    private Set<String> allvertice2 = new HashSet<>();
+    private List<Triple<String,String, Map<String,Object>>> vertices2;
     private List<Integer> vertices;
     private List<Pair<Integer, Integer>> edges;
+    private List<Triple<Pair<String,String>,String, Map<String,Object>>> edges2;
 
     private final HugeGraph graph;
     private final VertexLabel vl;
@@ -62,6 +65,12 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer> {
     private void reset() {
         this.vertices = new ArrayList<>();
         this.edges = new ArrayList<>(EDGE_BATCH_NUMBER);
+    }
+
+    private void reset2()
+    {
+        this.vertices2 = new ArrayList<>();
+        this.edges2 = new ArrayList<>(EDGE_BATCH_NUMBER);
     }
 
     @Override
@@ -90,7 +99,6 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer> {
 
         this.pool.submit(() -> {
             for (Integer v : vertices) {
-                //TODO:  未写properties 与单例模式不同
                 this.graph.addVertex(T.id, v, T.label, HugeGraphDatabase.NODE);
             }
             HugeVertex source;
@@ -116,5 +124,98 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer> {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 加载自定义类型数据
+     * 使用需自行实现
+     * 如果id=null，则没有id
+     * 如果properties=null,则没有属性
+     * 如果id,properties=null,则只创建一个vertex
+     * E 为string
+     * @param id
+     * @param properties
+     * @return
+     */
+    @Override
+    public String getOrCreateCust(String label,String id, Map<String,Object> properties)
+    {
+        if (Objects.isNull(id)) {
+            this.vertices2.add(Triple.of(label, "n", properties));
+            return String.valueOf(vertices2.size() - 1); //index of the list
+        }
+        if (!this.allvertice2.contains(id)) {
+            this.allvertice2.add(id);
+            this.vertices2.add(Triple.of(label, id, properties));
+        }
+        return id;
+    }
+    /**
+     * 加载自定义类型数据
+     * 使用需自行实现
+     * 如果properties=null,则没有属性写入
+     * @param src
+     * @param dest
+     * @param properties
+     */
+    @Override
+    public void relateNodesCust(String label,final String src, final String dest,Map<String,Object> properties)
+    {
+        this.edges2.add(Triple.of(Pair.of(src, dest), label, properties));
+        if (this.edges2.size() >= EDGE_BATCH_NUMBER) {
+            this.batchCommit2();
+            this.reset();
+        }
+    }
+
+    private void batchCommit2() {
+        List<Triple<String,String, Map<String,Object>>> vertices = this.vertices2;
+        List<Triple<Pair<String,String>,String, Map<String,Object>>> edges = this.edges2;
+
+        this.pool.submit(() -> {
+            Map<String, HugeVertex> cache = new HashMap<>();
+            int i=0;
+            for (Triple<String,String, Map<String,Object>> v : vertices) {
+                if (v.getMiddle().equals("n")) {
+                    HugeVertex vertex = (HugeVertex)this.graph.addVertex(
+                            T.label, v.getLeft(), Utils.mapTopair(v.getRight()));
+                    cache.put(String.valueOf(i), vertex);
+                } else {
+                    this.graph.addVertex(
+                            T.id, v.getMiddle(),
+                            T.label, v.getLeft(),
+                            Utils.mapTopair(v.getRight()));
+                }
+                i++;
+            }
+            HugeVertex source;
+            HugeVertex target;
+            for (Triple<Pair<String,String>,String, Map<String,Object>> e: edges2) {
+                Pair<String, String> srcTarget = e.getLeft();
+                String label = e.getMiddle();
+                if (cache.containsKey(srcTarget.getLeft())) {
+                    source = cache.get(srcTarget.getLeft());
+                } else {
+                    source = new HugeVertex(
+                            this.graph,
+                            IdGenerator.of(srcTarget.getLeft()),
+                            this.graph.vertexLabel(
+                                    TaiShiDataUtils.getVertexLabel(label,true)));
+                }
+
+                if (cache.containsKey(srcTarget.getRight())) {
+                    target = cache.get(srcTarget.getRight());
+                } else {
+                    target = new HugeVertex(
+                            this.graph,
+                            IdGenerator.of(srcTarget.getRight()),
+                            this.graph.vertexLabel(
+                                    TaiShiDataUtils.getVertexLabel(label, false)));
+                }
+
+                source.addEdge(label, target,Utils.mapTopair(e.getRight()));
+            }
+            this.graph.tx().commit();
+        });
     }
 }

@@ -33,6 +33,8 @@ import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.structure.constant.T;
 import com.baidu.hugegraph.type.define.Directions;
 import com.codahale.metrics.Timer;
+import eu.socialsensor.insert.CustomData;
+import eu.socialsensor.insert.InsertionBase;
 import eu.socialsensor.utils.HugeGraphUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -201,6 +203,14 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
         HugeGraphMassiveInsertion insertion =
                 new HugeGraphMassiveInsertion(this.hugeClient.graph());
         insertion.createGraph(dataPath, 0);
+    }
+
+    @Override
+    public void massiveModeLoading(File dataPath, CustomData customData)
+    {
+        HugeGraphMassiveInsertion insertion =
+                new HugeGraphMassiveInsertion(this.hugeClient.graph());
+        customData.createGraph(dataPath, insertion, 0);
     }
 
     @Override

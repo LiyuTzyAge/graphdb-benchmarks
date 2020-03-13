@@ -1,5 +1,8 @@
 package eu.socialsensor.graphdatabases;
 
+import eu.socialsensor.insert.CustomData;
+import eu.socialsensor.insert.InsertionBase;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +62,8 @@ public interface GraphDatabase<VertexIteratorType, EdgeIteratorType, VertexType,
      *            - dataset path
      */
     public void massiveModeLoading(File dataPath);
+
+    public void massiveModeLoading(File dataPath,CustomData customData);
 
     /**
      * Inserts data in single mode

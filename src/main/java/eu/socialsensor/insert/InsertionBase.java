@@ -3,6 +3,8 @@ package eu.socialsensor.insert;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,16 +28,17 @@ import eu.socialsensor.utils.Utils;
  * @param <T>
  *            the Type of vertexes (graph database vendor specific)
  */
-public abstract class InsertionBase<T> implements Insertion
+public abstract class InsertionBase<T,E> implements Insertion
 {
     private static final Logger logger = LogManager.getLogger();
+    public static CustomData custom = null;
     public static final String INSERTION_CONTEXT = ".eu.socialsensor.insertion.";
-    private final Timer getOrCreateTimes;
-    private final Timer relateNodesTimes;
+    public final Timer getOrCreateTimes;
+    public final Timer relateNodesTimes;
 
     protected final GraphDatabaseType type;
     protected final List<Double> insertionTimes;
-    private final boolean single;
+    final boolean single;
 
     // to write intermediate times for SingleInsertion subclasses
     protected final File resultsPath;
@@ -76,8 +79,41 @@ public abstract class InsertionBase<T> implements Insertion
         // NOOP
     }
 
+    /**
+     * 加载自定义类型数据
+     * 使用需自行实现
+     * 如果id=null，则没有id
+     * 如果properties=null,则没有属性
+     * 如果id,properties=null,则只创建一个vertex
+     * @param id
+     * @param properties
+     * @return
+     */
+    public E getOrCreateCust(String label,String id, Map<String,Object> properties)
+    {
+        throw new IllegalStateException("need sub class override");
+    }
+
+    /**
+     * 加载自定义类型数据
+     * 使用需自行实现
+     * 如果properties=null,则没有属性写入
+     * @param src
+     * @param dest
+     * @param properties
+     */
+    public  void relateNodesCust(String label,final E src, final E dest,Map<String,Object> properties)
+    {
+        throw new IllegalStateException("need sub class override");
+    }
+
     public final void createGraph(File datasetFile, int scenarioNumber)
     {
+        if (Objects.nonNull(custom)) {
+            //写入图
+            custom.createGraph(datasetFile,this,scenarioNumber);
+            return;
+        }
         logger.info("Loading data in {} mode in {} database . . . .", single ? "single" : "massive",
             type.name());
         Dataset dataset = DatasetFactory.getInstance().getDataset(datasetFile);

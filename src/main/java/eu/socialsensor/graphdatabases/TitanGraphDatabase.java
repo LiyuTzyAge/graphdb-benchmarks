@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import eu.socialsensor.insert.*;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 
@@ -41,9 +42,6 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe.LoopBundle;
 
-import eu.socialsensor.insert.Insertion;
-import eu.socialsensor.insert.TitanMassiveInsertion;
-import eu.socialsensor.insert.TitanSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.Utils;
@@ -272,6 +270,11 @@ public class TitanGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
         titanSingleInsertion.createGraph(dataPath, scenarioNumber);
     }
 
+    @Override
+    public void massiveModeLoading(File dataPath, CustomData customData)
+    {
+        throw new RuntimeException("not support !");
+    }
     @Override
     public void shutdown()
     {

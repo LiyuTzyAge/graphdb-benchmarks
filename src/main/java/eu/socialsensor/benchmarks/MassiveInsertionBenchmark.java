@@ -1,7 +1,10 @@
 package eu.socialsensor.benchmarks;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import eu.socialsensor.insert.Custom;
+import eu.socialsensor.insert.CustomData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +15,7 @@ import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.BenchmarkType;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.Utils;
+import org.parboiled.common.Preconditions;
 
 /**
  * MassiveInsertionBenchmark implementation
@@ -40,12 +44,38 @@ public class MassiveInsertionBenchmark extends PermutingBenchmarkBase implements
         // it is not related to the action of inserting.
         graphDatabase.createGraphForMassiveLoad();
         logger.debug("Massive load graph in database type {}", type.getShortname());
+
+        //custom dataset
+        CustomData<?> customData = null;
+        File customDataset = null;
+        if (bench.isCustomDataset()) {
+            Class<Custom> customDataClass = bench.getCustomDataClass();
+            customDataset = bench.getCustomDataset();
+            Preconditions.checkArgNotNull(
+                    customDataset, "dataset is null");
+            Preconditions.checkArgNotNull(
+                    customDataClass, "custom class is null");
+            logger.debug(String.format(
+                    "massive insertion custom dataset %s",
+                    bench.getCustomDataset().getName()));
+            try {
+                customData = new CustomData(customDataClass.newInstance());
+            } catch (IllegalAccessException | InstantiationException e) {
+                throw new RuntimeException("massive custom class instance faild",e);
+            }
+        }
+
         // reset start time ,skip the time of totalTimeMap
         super.totalTimeMap.put(type, System.currentTimeMillis());
         Stopwatch watch = new Stopwatch();
         watch.start();
         try {
-            graphDatabase.massiveModeLoading(bench.getDataset());
+            if (bench.isCustomDataset()) {
+//                customData.createGraph(customDataset,graphDatabase.massiveInsertion(),0);
+                graphDatabase.massiveModeLoading(customDataset,customData);
+            }else {
+                graphDatabase.massiveModeLoading(bench.getDataset());
+            }
         } catch (Exception e) {
             logger.error("massive insertion benchmark error",e.getMessage());
         }

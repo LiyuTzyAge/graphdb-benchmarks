@@ -340,4 +340,16 @@ public class Utils
         }
         return result;
     }
+
+    public static Object[] mapTopair(Map<String, Object> properties)
+    {
+        int size = properties.size() * 2;
+        Object[] re = new Object[size];
+        int i = 0;
+        for (Entry<String, Object> entry : properties.entrySet()) {
+            re[i++] = entry.getKey();
+            re[i++] = entry.getValue();
+        }
+        return re;
+    }
 }
