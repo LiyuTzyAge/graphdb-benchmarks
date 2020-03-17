@@ -15,7 +15,7 @@ import eu.socialsensor.main.GraphDatabaseType;
  * @author Alexander Patrikalakis
  * 
  */
-public final class Neo4jMassiveInsertion extends InsertionBase<Long>
+public final class Neo4jMassiveInsertion extends InsertionBase<Long,Object>
 {
     private final BatchInserter inserter;
     Map<Long, Long> cache = new HashMap<Long, Long>();

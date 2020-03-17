@@ -17,7 +17,7 @@ import eu.socialsensor.main.GraphDatabaseType;
  * @author Alexander Patrikalakis
  * 
  */
-public final class OrientSingleInsertion extends InsertionBase<Vertex>
+public final class OrientSingleInsertion extends InsertionBase<Vertex,Object>
 {
     protected final OrientGraph orientGraph;
     protected final OIndex<?> index;

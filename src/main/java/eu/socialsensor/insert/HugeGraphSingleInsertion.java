@@ -30,7 +30,7 @@ import eu.socialsensor.graphdatabases.HugeGraphDatabase;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.HugeGraphUtils;
 
-public class HugeGraphSingleInsertion extends InsertionBase<Vertex> {
+public class HugeGraphSingleInsertion extends InsertionBase<Vertex,Object> {
 
     private final GraphManager graphManager;
 

@@ -25,6 +25,7 @@ import org.janusgraph.graphdb.database.StandardJanusGraph;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -147,6 +148,15 @@ public class JanusGraphUtils
     public static Vertex addVertex(JanusGraph graph, Long id)
     {
         return addVertexAutoId(graph, id);
+    }
+
+    public static Vertex addVertex(JanusGraph graph,String label, Map<String,Object> properties)
+    {
+        JanusGraphVertex v = graph.addVertex(label);
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            v.property(entry.getKey(), entry.getValue());
+        }
+        return v;
     }
 
     /**

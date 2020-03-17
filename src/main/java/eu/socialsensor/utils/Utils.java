@@ -4,14 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import eu.socialsensor.graphdatabases.*;
 import org.apache.commons.io.FileUtils;
@@ -343,6 +337,9 @@ public class Utils
 
     public static Object[] mapTopair(Map<String, Object> properties)
     {
+        if (Objects.isNull(properties)) {
+            return new Object[0];
+        }
         int size = properties.size() * 2;
         Object[] re = new Object[size];
         int i = 0;

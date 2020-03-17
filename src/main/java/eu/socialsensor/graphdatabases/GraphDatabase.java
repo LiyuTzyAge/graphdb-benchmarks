@@ -1,5 +1,6 @@
 package eu.socialsensor.graphdatabases;
 
+import eu.socialsensor.insert.Custom;
 import eu.socialsensor.insert.CustomData;
 import eu.socialsensor.insert.InsertionBase;
 
@@ -82,6 +83,8 @@ public interface GraphDatabase<VertexIteratorType, EdgeIteratorType, VertexType,
      *            - dataset path
      */
     public void createGraphForMassiveLoad();
+
+    public void createGraphForCustom(Custom custom);
 
     /**
      * Shut down the graph database

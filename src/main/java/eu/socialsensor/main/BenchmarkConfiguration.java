@@ -162,24 +162,6 @@ public class BenchmarkConfiguration {
         Configuration janusgraph = socialsensor.subset("janusgraph");
         this.janusgraphConf = janusgraph.getString(JANUSGRAPH_CONF);
         this.janusgraphClientConf = janusgraph.getString(JANUSGRAPH_CLIENT_CONF);
-        //custom dataset
-        Configuration custom = socialsensor.subset("customDataset");
-        this.isCustomDataset = custom.getBoolean("on", false);
-        if (this.isCustomDataset) {
-            this.customDataset = new File(custom.getString(custom.getString("dataset")));
-            if (!this.customDataset.exists()) {
-                throw new RuntimeException(String.format("custom dataset %s is not found !", custom.getString("dataset")));
-            }
-            String className = custom.getString("class");
-            try {
-                this.customDataClass = (Class<Custom>) this.getClass().getClassLoader().loadClass(className);
-            } catch (ClassNotFoundException|ClassCastException e) {
-                throw new RuntimeException(String.format("custom class %s is not found !", className), e);
-            }
-        } else {
-            this.customDataset = null;
-            this.customDataClass = null;
-        }
 
         // metrics
         final Configuration metrics = socialsensor.subset(GraphDatabaseConfiguration.METRICS_NS.getName());
@@ -229,10 +211,33 @@ public class BenchmarkConfiguration {
             throw new IllegalArgumentException("configuration must specify database-storage-directory");
         }
         dbStorageDirectory = new File(socialsensor.getString(DATABASE_STORAGE_DIRECTORY));
-        dataset = validateReadableFile(socialsensor.getString(DATASET), DATASET);
 
-        // load the dataset
-        DatasetFactory.getInstance().getDataset(dataset);
+        //custom dataset
+        Configuration custom = socialsensor.subset("customDataset");
+        this.isCustomDataset = custom.getBoolean("on", false);
+        if (this.isCustomDataset) {
+            //custom model
+            this.customDataset = new File(custom.getString(custom.getString("dataset")));
+            if (!this.customDataset.exists()) {
+                throw new RuntimeException(String.format("custom dataset %s is not found !", custom.getString("dataset")));
+            }
+            String className = custom.getString("class");
+            try {
+                this.customDataClass = (Class<Custom>) this.getClass().getClassLoader().loadClass(className);
+            } catch (ClassNotFoundException|ClassCastException e) {
+                throw new RuntimeException(String.format("custom class %s is not found !", className), e);
+            }
+            //TODO:need ensure
+            dataset = null;
+        } else {
+            this.customDataset = null;
+            this.customDataClass = null;
+            //normal model
+            dataset = validateReadableFile(
+                    socialsensor.getString(DATASET), DATASET);
+            // load the dataset
+            DatasetFactory.getInstance().getDataset(dataset);
+        }
 
         if (!socialsensor.containsKey(PERMUTE_BENCHMARKS)) {
             throw new IllegalArgumentException("configuration must set permute-benchmarks to true or false");

@@ -1,9 +1,6 @@
 package eu.socialsensor.graphdatabases;
 
-import eu.socialsensor.insert.CustomData;
-import eu.socialsensor.insert.InsertionBase;
-import eu.socialsensor.insert.JanusGraphCoreMassiveInsertion;
-import eu.socialsensor.insert.JanusGraphCoreSingleInsertion;
+import eu.socialsensor.insert.*;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.utils.JanusGraphUtils;
 import org.apache.logging.log4j.LogManager;
@@ -198,6 +195,15 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     {
         buildGraphEnv(true,true);
         //TODO: 测试下批量配置的效果
+    }
+
+    @Override
+    public void createGraphForCustom(Custom custom)
+    {
+        open(true);
+        clear(true);
+        open(true);
+        custom.createSchema(this.graph.openManagement(), GraphDatabaseType.JANUSGRAPH_CORE);
     }
 
     @Override
@@ -606,5 +612,18 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     public void close(){
         if (transaction != null) transaction.close();
         if(graph != null) graph.close();
+    }
+
+    public JanusGraph getGraph()
+    {
+
+        return graph;
+    }
+    public JanusGraph openGraph()
+    {
+        open(true);
+        clear(true);
+        open(true);
+        return graph;
     }
 }

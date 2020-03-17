@@ -20,6 +20,8 @@ import eu.socialsensor.main.GraphDatabaseBenchmark;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.Utils;
 
+import javax.annotation.Nullable;
+
 /**
  * Base class for business logic of insertion workloads
  * 
@@ -89,7 +91,7 @@ public abstract class InsertionBase<T,E> implements Insertion
      * @param properties
      * @return
      */
-    public E getOrCreateCust(String label,String id, Map<String,Object> properties)
+    public E getOrCreateCust(String label, @Nullable String id, Map<String,Object> properties)
     {
         throw new IllegalStateException("need sub class override");
     }

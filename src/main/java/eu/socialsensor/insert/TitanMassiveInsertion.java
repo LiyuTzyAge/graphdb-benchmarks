@@ -14,7 +14,7 @@ import eu.socialsensor.main.GraphDatabaseType;
  * @author Alexander Patrikalakis
  * 
  */
-public class TitanMassiveInsertion extends InsertionBase<Vertex>
+public class TitanMassiveInsertion extends InsertionBase<Vertex,Object>
 {
     private final BatchGraph<TitanGraph> batchGraph;
 

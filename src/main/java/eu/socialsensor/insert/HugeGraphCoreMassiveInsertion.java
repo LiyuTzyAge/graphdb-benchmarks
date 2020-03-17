@@ -38,6 +38,9 @@ import com.baidu.hugegraph.structure.HugeVertex;
 import eu.socialsensor.graphdatabases.HugeGraphDatabase;
 import eu.socialsensor.main.GraphDatabaseType;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.eclipse.jetty.util.ConcurrentHashSet;
+
+import javax.annotation.Nullable;
 
 public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String> {
 
@@ -60,6 +63,7 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
         this.graph = graph;
         this.vl = this.graph.vertexLabel(HugeGraphDatabase.NODE);
         this.reset();
+        reset2();
     }
 
     private void reset() {
@@ -116,8 +120,11 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
 
     @Override
     protected void post() {
+        batchCommit2();
+        reset2();
         batchCommit();
         reset();
+
         this.pool.shutdown();
         try {
             this.pool.awaitTermination(60 * 5, TimeUnit.SECONDS);
@@ -129,16 +136,13 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
     /**
      * 加载自定义类型数据
      * 使用需自行实现
-     * 如果id=null，则没有id
-     * 如果properties=null,则没有属性
-     * 如果id,properties=null,则只创建一个vertex
-     * E 为string
+     * 如果id="n"，则没有id,使用list中的偏移量作为临时id
      * @param id
      * @param properties
      * @return
      */
     @Override
-    public String getOrCreateCust(String label,String id, Map<String,Object> properties)
+    public String getOrCreateCust(String label, @Nullable String id, Map<String,Object> properties)
     {
         if (Objects.isNull(id)) {
             this.vertices2.add(Triple.of(label, "n", properties));
@@ -164,10 +168,11 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
         this.edges2.add(Triple.of(Pair.of(src, dest), label, properties));
         if (this.edges2.size() >= EDGE_BATCH_NUMBER) {
             this.batchCommit2();
-            this.reset();
+            this.reset2();
         }
     }
 
+    private ConcurrentHashSet<String> edgeCache = new ConcurrentHashSet<>();
     private void batchCommit2() {
         List<Triple<String,String, Map<String,Object>>> vertices = this.vertices2;
         List<Triple<Pair<String,String>,String, Map<String,Object>>> edges = this.edges2;
@@ -179,6 +184,7 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
                 if (v.getMiddle().equals("n")) {
                     HugeVertex vertex = (HugeVertex)this.graph.addVertex(
                             T.label, v.getLeft(), Utils.mapTopair(v.getRight()));
+                    //index of the list
                     cache.put(String.valueOf(i), vertex);
                 } else {
                     this.graph.addVertex(
@@ -190,12 +196,14 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
             }
             HugeVertex source;
             HugeVertex target;
-            for (Triple<Pair<String,String>,String, Map<String,Object>> e: edges2) {
+            for (Triple<Pair<String,String>,String, Map<String,Object>> e: edges) {
                 Pair<String, String> srcTarget = e.getLeft();
                 String label = e.getMiddle();
                 if (cache.containsKey(srcTarget.getLeft())) {
+                    //系统自动创建id
                     source = cache.get(srcTarget.getLeft());
                 } else {
+                    //自定义id
                     source = new HugeVertex(
                             this.graph,
                             IdGenerator.of(srcTarget.getLeft()),
@@ -212,8 +220,11 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
                             this.graph.vertexLabel(
                                     TaiShiDataUtils.getVertexLabel(label, false)));
                 }
-
-                source.addEdge(label, target,Utils.mapTopair(e.getRight()));
+                String srcTargetIdStr = source.id() + ">" + target.id();
+                if (!edgeCache.contains(srcTargetIdStr)) {
+                    source.addEdge(label, target,Utils.mapTopair(e.getRight()));
+                    edgeCache.add(srcTargetIdStr);
+                }
             }
             this.graph.tx().commit();
         });

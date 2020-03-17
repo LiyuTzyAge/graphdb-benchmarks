@@ -15,7 +15,7 @@ import java.io.File;
  *
  * @Description:
  */
-public class JanusGraphCoreSingleInsertion  extends InsertionBase<Vertex>
+public class JanusGraphCoreSingleInsertion  extends InsertionBase<Vertex,Object>
 {
     private final JanusGraph graph;
     public JanusGraphCoreSingleInsertion(JanusGraph graph, File resultsPath)

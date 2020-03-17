@@ -23,7 +23,7 @@ import eu.socialsensor.main.GraphDatabaseType;
  * 
  */
 @SuppressWarnings("deprecation")
-public class Neo4jSingleInsertion extends InsertionBase<Node>
+public class Neo4jSingleInsertion extends InsertionBase<Node,Object>
 {
     private final GraphDatabaseService neo4jGraph;
     private final ExecutionEngine engine;

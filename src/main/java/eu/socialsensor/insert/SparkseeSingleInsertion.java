@@ -9,7 +9,7 @@ import com.sparsity.sparksee.gdb.Value;
 import eu.socialsensor.graphdatabases.SparkseeGraphDatabase;
 import eu.socialsensor.main.GraphDatabaseType;
 
-public class SparkseeSingleInsertion extends InsertionBase<Long>
+public class SparkseeSingleInsertion extends InsertionBase<Long,Object>
 {
     private final Session session;
     private final Graph sparkseeGraph;

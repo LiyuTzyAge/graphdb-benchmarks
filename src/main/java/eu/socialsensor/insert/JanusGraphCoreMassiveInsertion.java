@@ -3,16 +3,22 @@ package eu.socialsensor.insert;
 import eu.socialsensor.graphdatabases.JanusGraphCoreDatabase;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.JanusGraphUtils;
+import eu.socialsensor.utils.Utils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphTransaction;
+import org.janusgraph.core.JanusGraphVertex;
 import org.janusgraph.diskstorage.BackendException;
 
+import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -26,14 +32,16 @@ import static eu.socialsensor.graphdatabases.JanusGraphCoreDatabase.createSchema
  *
  * @Description:
  */
-public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex>
+public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
 {
     private final JanusGraph graph;
 //    private final JanusGraphTransaction tx;
     private Set<Integer> allVertices = new HashSet<>();
     private Map<Integer,Vertex> allVerticesMap = new HashMap<>(1000000);
+    private Map<String, Vertex> allVerticesMap2 = new HashMap<>(100000);
 //    private volatile List<Integer> vertices;
     private volatile List<Pair<Vertex, Vertex>> edges;
+    private volatile List<Triple<String,Pair<Vertex, Vertex>,Map<String,Object>>> edges2;
     private static final int EDGE_BATCH_NUMBER = 500;
     private ExecutorService pool = Executors.newFixedThreadPool(8);
     private static final Logger LOG = LogManager.getLogger();
@@ -43,6 +51,7 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex>
         this.graph = graph;
 //        this.tx = graph.tx().createThreadedTx();
         reset();
+        reset2();
     }
 
     /**
@@ -70,6 +79,11 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex>
     private void reset() {
 //        this.vertices = new ArrayList<>();
         this.edges = new ArrayList<>(EDGE_BATCH_NUMBER);
+    }
+
+    private void reset2()
+    {
+        this.edges2 = new ArrayList<>(EDGE_BATCH_NUMBER);
     }
 
     @Override
@@ -126,6 +140,8 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex>
 
     @Override
     protected void post() {
+        batchCommit2();
+        reset2();
         batchCommit();
         reset();
         this.pool.shutdown();
@@ -134,6 +150,61 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex>
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void post2()
+    {
+        post();
+    }
+
+
+    @Override
+    public Vertex getOrCreateCust(String label, @Nullable String id, Map<String,Object> properties)
+    {
+        Vertex vertex;
+        if (Objects.isNull(id)) {
+            return JanusGraphUtils.addVertex(this.graph, label, properties);
+        }
+        if (!this.allVerticesMap2.containsKey(id)) {
+            //this.vertices.add(v);
+            vertex = JanusGraphUtils.addVertex(this.graph, label, properties);
+            this.allVerticesMap2.put(id, vertex);
+        } else {
+            vertex = allVerticesMap2.get(id);
+        }
+        return vertex;
+    }
+
+    public void relateNodesCust(String label,final Vertex src, final Vertex dest,Map<String,Object> properties)
+    {
+        this.edges2.add(Triple.of(label, Pair.of(src, dest), properties));
+        if (this.edges2.size() >= EDGE_BATCH_NUMBER) {
+            this.batchCommit2();
+            this.reset2();
+        }
+    }
+
+    private ConcurrentHashSet<String> edgeCache = new ConcurrentHashSet<>();
+    private void batchCommit2() {
+//        List<Integer> vs = this.vertices;
+        List<Triple<String,Pair<Vertex, Vertex>,Map<String,Object>>> es = this.edges2;
+
+        this.pool.submit(() -> {
+            try {
+                for (Triple<String,Pair<Vertex, Vertex>,Map<String,Object>> e : es) {
+                    JanusGraphVertex src = (JanusGraphVertex)e.getMiddle().getLeft();
+                    JanusGraphVertex target = (JanusGraphVertex)e.getMiddle().getRight();
+                    String key = src.id() + ">" + target.id();
+                    if (!edgeCache.contains(key)) {
+                        src.addEdge(e.getLeft(),target , Utils.mapTopair(e.getRight()));
+                        edgeCache.add(key);
+                    }
+                }
+                this.graph.tx().commit();
+            } catch (Exception e) {
+                LOG.error("massive insert error",e);
+            }
+        });
     }
 
 

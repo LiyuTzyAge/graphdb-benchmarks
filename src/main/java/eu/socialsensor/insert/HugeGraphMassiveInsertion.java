@@ -34,7 +34,7 @@ import com.baidu.hugegraph.structure.graph.Vertex;
 import eu.socialsensor.graphdatabases.HugeGraphDatabase;
 import eu.socialsensor.main.GraphDatabaseType;
 
-public class HugeGraphMassiveInsertion extends InsertionBase<Integer> {
+public class HugeGraphMassiveInsertion extends InsertionBase<Integer,Object> {
 
     private ExecutorService pool = Executors.newFixedThreadPool(8);
     private Set<Integer> vertices = new HashSet<>();

@@ -16,7 +16,7 @@ import java.io.File;
  *
  * @Description:
  */
-public class JanusgraphSingleInsertion  extends InsertionBase<Vertex>
+public class JanusgraphSingleInsertion  extends InsertionBase<Vertex,Object>
 {
     private final JanusGraphClient client;
     public JanusgraphSingleInsertion(JanusGraphClient client, File resultsPath)

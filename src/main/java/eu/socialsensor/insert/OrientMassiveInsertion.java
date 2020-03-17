@@ -13,7 +13,7 @@ import eu.socialsensor.main.GraphDatabaseType;
  * @author Alexander Patrikalakis
  * 
  */
-public class OrientMassiveInsertion extends InsertionBase<Long> implements Insertion
+public class OrientMassiveInsertion extends InsertionBase<Long,Object> implements Insertion
 {
     private static final int ESTIMATED_ENTRIES = 1000000;
     private static final int AVERAGE_NUMBER_OF_EDGES_PER_NODE = 40;

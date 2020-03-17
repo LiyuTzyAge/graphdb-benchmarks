@@ -39,14 +39,9 @@ public class MassiveInsertionBenchmark extends PermutingBenchmarkBase implements
         logger.debug("Creating database instance for type " + type.getShortname());
         GraphDatabase<?,?,?,?> graphDatabase = Utils.createDatabaseInstance(bench, type);
         logger.debug("Prepare database instance for type {} for massive loading", type.getShortname());
-        // the following step includes provisioning in managed database
-        // services. do not measure this time as
-        // it is not related to the action of inserting.
-        graphDatabase.createGraphForMassiveLoad();
-        logger.debug("Massive load graph in database type {}", type.getShortname());
 
         //custom dataset
-        CustomData<?> customData = null;
+        CustomData customData = null;
         File customDataset = null;
         if (bench.isCustomDataset()) {
             Class<Custom> customDataClass = bench.getCustomDataClass();
@@ -61,8 +56,16 @@ public class MassiveInsertionBenchmark extends PermutingBenchmarkBase implements
             try {
                 customData = new CustomData(customDataClass.newInstance());
             } catch (IllegalAccessException | InstantiationException e) {
-                throw new RuntimeException("massive custom class instance faild",e);
+                throw new RuntimeException("massive custom class instance faild", e);
             }
+            graphDatabase.createGraphForCustom(customData.getCustom());
+            logger.debug("Custom load graph in database type {}", type.getShortname());
+        } else {
+            // the following step includes provisioning in managed database
+            // services. do not measure this time as
+            // it is not related to the action of inserting.
+            graphDatabase.createGraphForMassiveLoad();
+            logger.debug("Massive load graph in database type {}", type.getShortname());
         }
 
         // reset start time ,skip the time of totalTimeMap

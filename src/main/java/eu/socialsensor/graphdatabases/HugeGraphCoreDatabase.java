@@ -30,8 +30,7 @@ import java.util.Set;
 
 import com.baidu.hugegraph.traversal.algorithm.HugeTraverser;
 import com.baidu.hugegraph.traversal.algorithm.NeighborRankTraverser;
-import eu.socialsensor.insert.CustomData;
-import eu.socialsensor.insert.InsertionBase;
+import eu.socialsensor.insert.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -53,8 +52,6 @@ import com.baidu.hugegraph.traversal.algorithm.ShortestPathTraverser;
 import com.baidu.hugegraph.type.HugeType;
 import com.baidu.hugegraph.type.define.Directions;
 
-import eu.socialsensor.insert.HugeGraphCoreMassiveInsertion;
-import eu.socialsensor.insert.HugeGraphCoreSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.GraphDatabaseType;
 
@@ -179,6 +176,14 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
         HugeGraphCoreMassiveInsertion insertion =
                 new HugeGraphCoreMassiveInsertion(this.graph);
         customData.createGraph(dataPath, insertion, 0);
+    }
+
+    @Override
+    public void createGraphForCustom(Custom custom)
+    {
+        this.graph = loadGraph(true);
+        this.g = this.graph.traversal();
+        custom.createSchema(this.graph.schema(),GraphDatabaseType.HUGEGRAPH_CORE);
     }
 
     @Override
@@ -520,7 +525,7 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
      * @return
      */
 //    private static HugeGraph loadGraph(boolean needClear) {
-    private HugeGraph loadGraph(boolean needClear) {
+    public HugeGraph loadGraph(boolean needClear) {
         // Register backends if needed
         if (!registered) {
             RegisterUtil.registerBackends();
@@ -548,7 +553,12 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
             // Init backend
             graph.initBackend();
         }
+        this.graph = graph;
+        return graph;
+    }
 
+    public HugeGraph getGraph()
+    {
         return graph;
     }
 }

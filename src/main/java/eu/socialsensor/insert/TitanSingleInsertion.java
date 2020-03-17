@@ -16,7 +16,7 @@ import eu.socialsensor.main.GraphDatabaseType;
  * @author Alexander Patrikalakis
  * 
  */
-public class TitanSingleInsertion extends InsertionBase<Vertex>
+public class TitanSingleInsertion extends InsertionBase<Vertex,Object>
 {
     private final TitanGraph titanGraph;
 

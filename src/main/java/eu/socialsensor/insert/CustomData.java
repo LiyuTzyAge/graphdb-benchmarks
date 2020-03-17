@@ -18,13 +18,13 @@ import java.util.concurrent.TimeUnit;
  *
  * @Description:
  */
-public class CustomData<U>
+public class CustomData
 {
 
     private static final Logger LOG = LogManager.getLogger();
 
-    private final Custom<U> custom;
-    public CustomData(Custom<U> custom)
+    private final Custom custom;
+    public CustomData(Custom custom)
     {
         this.custom = custom;
     }
@@ -34,7 +34,7 @@ public class CustomData<U>
         //1.读取文件，返回实体实例
         //2.记录时间
         //3.调用getOrCreateCust与relateNodesCust写入数据
-        Iterator<U> iterator = null;
+        Iterator<Object> iterator = null;
         try {
             iterator = custom.readLine(dataFile);
         } catch (IOException e) {
@@ -46,7 +46,7 @@ public class CustomData<U>
         watch.start();
         int i = 4;
         while (iterator.hasNext()) {
-            U line = iterator.next();
+            Object line = iterator.next();
             custom.writeData(line,insertionBase);
             if (i % 1000 == 0)
             {
@@ -74,5 +74,10 @@ public class CustomData<U>
                     )
             );
         }
+    }
+
+    public Custom getCustom()
+    {
+        return custom;
     }
 }

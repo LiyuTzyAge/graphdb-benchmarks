@@ -6,6 +6,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
 import eu.socialsensor.insert.Custom;
 import eu.socialsensor.insert.InsertionBase;
+import eu.socialsensor.main.GraphDatabaseType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.tuple.Pair;
@@ -34,7 +35,7 @@ import static eu.socialsensor.utils.JanusGraphUtils.*;
  *
  * @Description: 处理态势数据
  */
-public class TaiShiDataUtils implements Custom<TaiShiDataUtils.TaiShiDataset>
+public class TaiShiDataUtils implements Custom
 {
 
     public static final Logger LOG = LogManager.getLogger(TaiShiDataUtils.class);
@@ -105,25 +106,25 @@ public class TaiShiDataUtils implements Custom<TaiShiDataUtils.TaiShiDataset>
         huge.vertexLabel(SIP).properties(IP).useCustomizeStringId().ifNotExist().create();
         huge.vertexLabel(DIP).properties(IP).useCustomizeStringId().ifNotExist().create();
         huge.vertexLabel(ATTACKER).properties(IP).useCustomizeStringId().ifNotExist().create();
-        huge.vertexLabel(ATTACK_EDGE).properties(ATTACK_RESULT,KILL_CHAIN,SEVERITY,VICTIM_TYPE,
+        huge.vertexLabel(ATTACK_EDGE).properties(ATTACK_TYPE_ID,ATTACK_RESULT,KILL_CHAIN,SEVERITY,VICTIM_TYPE,
                 WRITE_DATE,ATTACK_TYPE,RULE_ID,RULE_NAME,RULE_VERSION,
                 VULN_DESC,VULN_HARM,VULN_NAME,VULN_TYPE,URI).
-                nullableKeys(ATTACK_RESULT,KILL_CHAIN,SEVERITY,VICTIM_TYPE,
+                nullableKeys(ATTACK_TYPE_ID,ATTACK_RESULT,KILL_CHAIN,SEVERITY,VICTIM_TYPE,
                         WRITE_DATE,ATTACK_TYPE,RULE_ID,RULE_NAME,RULE_VERSION,
                         VULN_DESC,VULN_HARM,VULN_NAME,VULN_TYPE,URI).
                 useAutomaticId().ifNotExist().create();
         huge.vertexLabel(DPORT).properties(DPORT).useCustomizeStringId().ifNotExist().create();
         huge.vertexLabel(VICTIM).properties(IP).useCustomizeStringId().ifNotExist().create();
 
-        huge.edgeLabel(IPTOATT).link(IP, ATTACKER).ifNotExist().create();
-        huge.edgeLabel(IPTOSIP).link(IP, SIP).ifNotExist().create();
+        huge.edgeLabel(IPTOATT).link(SERVER, ATTACKER).ifNotExist().create();
+        huge.edgeLabel(IPTOSIP).link(SERVER, SIP).ifNotExist().create();
         huge.edgeLabel(STOATT).link(SIP, ATTACKER).ifNotExist().create();
         huge.edgeLabel(ATOATT).link(ATTACKER, ATTACK_EDGE).properties(WRITE_DATE).ifNotExist().create();
         huge.edgeLabel(ATODPORT).link(ATTACK_EDGE, DPORT).properties(WRITE_DATE).ifNotExist().create();
         huge.edgeLabel(DPORTTOVIC).link(DPORT, VICTIM).ifNotExist().create();
         huge.edgeLabel(DIPTOVIC).link(DIP, VICTIM).ifNotExist().create();
-        huge.edgeLabel(IPTODIP).link(IP, DIP).ifNotExist().create();
-        huge.edgeLabel(IPTOVIC).link(IP, VICTIM).ifNotExist().create();
+        huge.edgeLabel(IPTODIP).link(SERVER, DIP).ifNotExist().create();
+        huge.edgeLabel(IPTOVIC).link(SERVER, VICTIM).ifNotExist().create();
 
         huge.indexLabel("attack_type_id").onV(ATTACK_EDGE).by(ATTACK_TYPE_ID).secondary().ifNotExist().create();
         huge.indexLabel("rule_id").onV(ATTACK_EDGE).by(RULE_ID).secondary().ifNotExist().create();
@@ -208,6 +209,7 @@ public class TaiShiDataUtils implements Custom<TaiShiDataUtils.TaiShiDataset>
         buildVertexCompositeIndex(janus, "write_date", false, attack_edge, write_date);
         janus.buildIndex("edge_write_date", Edge.class).indexOnly(atoatt)
              .addKey(write_date).buildCompositeIndex();
+        janus.commit();
     }
 
 
@@ -218,7 +220,7 @@ public class TaiShiDataUtils implements Custom<TaiShiDataUtils.TaiShiDataset>
      * @return
      */
     @Override
-    public Iterator<TaiShiDataset> readLine(File fileOrDir) throws IOException
+    public Iterator<Object> readLine(File fileOrDir) throws IOException
     {
         checkArgNotNull(fileOrDir, "data file is null!");
         if (fileOrDir.isFile()) {
@@ -819,7 +821,7 @@ public class TaiShiDataUtils implements Custom<TaiShiDataUtils.TaiShiDataset>
     /**
      *
      */
-    public static class Iter implements Iterator<TaiShiDataset>
+    public static class Iter implements Iterator<Object>
     {
 
         private LineIterator lineIterator;
@@ -868,16 +870,15 @@ public class TaiShiDataUtils implements Custom<TaiShiDataUtils.TaiShiDataset>
 
     /**
      * write data into graph,and mertic timer
-     * @param line
+     * @param lineData
      * @param insertionBase
      * @param <T>
      */
     @Override
-    public <T,E> void writeData(TaiShiDataset line,InsertionBase<T,E> insertionBase)
+    public <T,E> void writeData(Object lineData,InsertionBase<T,E> insertionBase)
     {
-
-        //TODO:测试 ，janusgraph逻辑实现
-        Preconditions.checkArgNotNull(line, "taishi data line is null");
+        Preconditions.checkArgNotNull(lineData, "taishi data line is null");
+        TaiShiDataset line = (TaiShiDataset) lineData;
         Timer getOrCreateTimes = insertionBase.getOrCreateTimes;
         Timer relateNodesTimes = insertionBase.relateNodesTimes;
 
@@ -976,7 +977,19 @@ public class TaiShiDataUtils implements Custom<TaiShiDataUtils.TaiShiDataset>
         }
     }
 
-
-
+    @Override
+    public void createSchema(Object graph, GraphDatabaseType type)
+    {
+        switch (type) {
+            case HUGEGRAPH_CORE:
+                createSchema((SchemaManager) graph);
+                break;
+            case JANUSGRAPH_CORE:
+                createSchema((JanusGraphManagement) graph);
+                break;
+            default:
+                throw new RuntimeException(String.format("The graph database type %s is not regist!"));
+        }
+    }
 
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import eu.socialsensor.insert.Custom;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.GraphDatabaseAPI;
 
@@ -239,5 +240,11 @@ public abstract class GraphDatabaseBase<VertexIteratorType, EdgeIteratorType, Ve
     private static double avgArr(List<Long> arr)
     {
         return arr.stream().reduce((a, b) -> (a + b)).get().doubleValue() / arr.size();
+    }
+
+    @Override
+    public void createGraphForCustom(Custom custom)
+    {
+        throw new RuntimeException("need implements by youself !");
     }
 }

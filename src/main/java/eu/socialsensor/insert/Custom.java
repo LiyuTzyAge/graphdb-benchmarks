@@ -1,5 +1,7 @@
 package eu.socialsensor.insert;
 
+import eu.socialsensor.main.GraphDatabaseType;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -11,14 +13,14 @@ import java.util.Iterator;
  *
  * @Description:
  */
-public interface Custom<E>
+public interface Custom
 {
     /**
      * read file return data instance
      * @param fileOrDir
      * @return
      */
-    Iterator<E> readLine(File fileOrDir) throws IOException;
+    Iterator<Object> readLine(File fileOrDir) throws IOException;
 
     /**
      * write data into graph
@@ -26,5 +28,7 @@ public interface Custom<E>
      * @param insertionBase
      * @param <T>
      */
-    <T,U> void writeData(E line, InsertionBase<T,U> insertionBase);
+    <T,U> void writeData(Object line, InsertionBase<T,U> insertionBase);
+
+    void createSchema(Object graph, GraphDatabaseType type);
 }

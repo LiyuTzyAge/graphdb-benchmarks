@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @Description:
  */
-public class JanusgraphMassiveInsertion extends InsertionBase<Integer>
+public class JanusgraphMassiveInsertion extends InsertionBase<Integer,Object>
 {
     private JanusGraphClient client;
     private ExecutorService pool = Executors.newFixedThreadPool(8);
