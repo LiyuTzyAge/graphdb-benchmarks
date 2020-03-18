@@ -135,15 +135,15 @@ public class TaiShiDataUtils implements Custom
 
     private static Map<String, Pair<String, String>> edgeLabelMap = new HashMap<>();
     static {
-        edgeLabelMap.put(IPTOATT, Pair.of(IP, ATTACKER));
-        edgeLabelMap.put(IPTOSIP, Pair.of(IP, SIP));
+        edgeLabelMap.put(IPTOATT, Pair.of(SERVER, ATTACKER));
+        edgeLabelMap.put(IPTOSIP, Pair.of(SERVER, SIP));
         edgeLabelMap.put(STOATT, Pair.of(SIP, ATTACKER));
         edgeLabelMap.put(ATOATT, Pair.of(ATTACKER, ATTACK_EDGE));
         edgeLabelMap.put(ATODPORT, Pair.of(ATTACK_EDGE, DPORT));
         edgeLabelMap.put(DPORTTOVIC, Pair.of(DPORT, VICTIM));
         edgeLabelMap.put(DIPTOVIC, Pair.of(DIP, VICTIM));
-        edgeLabelMap.put(IPTODIP, Pair.of(IP, DIP));
-        edgeLabelMap.put(IPTOVIC, Pair.of(IP, VICTIM));
+        edgeLabelMap.put(IPTODIP, Pair.of(SERVER, DIP));
+        edgeLabelMap.put(IPTOVIC, Pair.of(SERVER, VICTIM));
     }
     public static String getVertexLabel(String edgelabel,boolean left)
     {

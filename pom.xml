@@ -75,17 +75,17 @@
             <!--<scope>test</scope>-->
         <!--</dependency>-->
         <!-- https://mvnrepository.com/artifact/com.datastax.cassandra/cassandra-driver-core -->
-        <dependency>
-            <groupId>com.datastax.cassandra</groupId>
-            <artifactId>cassandra-driver-core</artifactId>
-            <version>3.2.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.42.Final</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.datastax.cassandra</groupId>-->
+            <!--<artifactId>cassandra-driver-core</artifactId>-->
+            <!--<version>3.2.0</version>-->
+        <!--</dependency>-->
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/io.netty/netty-all &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>io.netty</groupId>-->
+            <!--<artifactId>netty-all</artifactId>-->
+            <!--<version>4.1.42.Final</version>-->
+        <!--</dependency>-->
 
 
         <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->

@@ -174,7 +174,7 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
     public void massiveModeLoading(File dataPath, CustomData customData)
     {
         HugeGraphCoreMassiveInsertion insertion =
-                new HugeGraphCoreMassiveInsertion(this.graph);
+                new HugeGraphCoreMassiveInsertion(this.graph,true);
         customData.createGraph(dataPath, insertion, 0);
     }
 

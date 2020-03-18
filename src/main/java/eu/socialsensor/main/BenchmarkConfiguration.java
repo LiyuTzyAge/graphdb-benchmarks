@@ -217,13 +217,14 @@ public class BenchmarkConfiguration {
         this.isCustomDataset = custom.getBoolean("on", false);
         if (this.isCustomDataset) {
             //custom model
-            this.customDataset = new File(custom.getString(custom.getString("dataset")));
+            this.customDataset = new File(custom.getString("dataset"));
             if (!this.customDataset.exists()) {
                 throw new RuntimeException(String.format("custom dataset %s is not found !", custom.getString("dataset")));
             }
             String className = custom.getString("class");
             try {
-                this.customDataClass = (Class<Custom>) this.getClass().getClassLoader().loadClass(className);
+                this.customDataClass = (Class<Custom>) Class.forName(className);
+//                this.customDataClass = (Class<Custom>) this.getClass().getClassLoader().loadClass(className);
             } catch (ClassNotFoundException|ClassCastException e) {
                 throw new RuntimeException(String.format("custom class %s is not found !", className), e);
             }

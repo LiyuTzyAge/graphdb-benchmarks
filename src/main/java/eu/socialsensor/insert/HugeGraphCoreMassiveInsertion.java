@@ -28,6 +28,8 @@ import eu.socialsensor.utils.TaiShiDataUtils;
 import eu.socialsensor.utils.Utils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.structure.T;
 
 import com.baidu.hugegraph.HugeGraph;
@@ -44,7 +46,7 @@ import javax.annotation.Nullable;
 
 public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String> {
 
-    private static final int EDGE_BATCH_NUMBER = 500;
+    private static final int EDGE_BATCH_NUMBER = 250;
 
     private ExecutorService pool = Executors.newFixedThreadPool(8);
 
@@ -57,12 +59,21 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
 
     private final HugeGraph graph;
     private final VertexLabel vl;
+    private static final Logger LOG = LogManager.getLogger();
 
     public HugeGraphCoreMassiveInsertion(HugeGraph graph) {
         super(GraphDatabaseType.HUGEGRAPH_CORE, null);
         this.graph = graph;
         this.vl = this.graph.vertexLabel(HugeGraphDatabase.NODE);
         this.reset();
+        reset2();
+    }
+
+    public HugeGraphCoreMassiveInsertion(HugeGraph graph,boolean custom)
+    {
+        super(GraphDatabaseType.HUGEGRAPH_CORE, null);
+        this.graph = graph;
+        this.vl = null;
         reset2();
     }
 
@@ -133,6 +144,11 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
         }
     }
 
+    public void post2()
+    {
+        post();
+    }
+
     /**
      * 加载自定义类型数据
      * 使用需自行实现
@@ -178,55 +194,61 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
         List<Triple<Pair<String,String>,String, Map<String,Object>>> edges = this.edges2;
 
         this.pool.submit(() -> {
-            Map<String, HugeVertex> cache = new HashMap<>();
-            int i=0;
-            for (Triple<String,String, Map<String,Object>> v : vertices) {
-                if (v.getMiddle().equals("n")) {
-                    HugeVertex vertex = (HugeVertex)this.graph.addVertex(
-                            T.label, v.getLeft(), Utils.mapTopair(v.getRight()));
-                    //index of the list
-                    cache.put(String.valueOf(i), vertex);
-                } else {
-                    this.graph.addVertex(
-                            T.id, v.getMiddle(),
-                            T.label, v.getLeft(),
-                            Utils.mapTopair(v.getRight()));
-                }
-                i++;
-            }
-            HugeVertex source;
-            HugeVertex target;
-            for (Triple<Pair<String,String>,String, Map<String,Object>> e: edges) {
-                Pair<String, String> srcTarget = e.getLeft();
-                String label = e.getMiddle();
-                if (cache.containsKey(srcTarget.getLeft())) {
-                    //系统自动创建id
-                    source = cache.get(srcTarget.getLeft());
-                } else {
-                    //自定义id
-                    source = new HugeVertex(
-                            this.graph,
-                            IdGenerator.of(srcTarget.getLeft()),
-                            this.graph.vertexLabel(
-                                    TaiShiDataUtils.getVertexLabel(label,true)));
-                }
+            try {
+                Map<String, HugeVertex> cache = new HashMap<>();
+                int i = 0;
+                for (Triple<String, String, Map<String, Object>> v : vertices) {
+                    if (v.getMiddle().equals("n")) {
+                        HugeVertex vertex = (HugeVertex) this.graph.addVertex(
+                                Utils.assemble(Utils.mapTopair(v.getRight()),T.label, v.getLeft()));
 
-                if (cache.containsKey(srcTarget.getRight())) {
-                    target = cache.get(srcTarget.getRight());
-                } else {
-                    target = new HugeVertex(
-                            this.graph,
-                            IdGenerator.of(srcTarget.getRight()),
-                            this.graph.vertexLabel(
-                                    TaiShiDataUtils.getVertexLabel(label, false)));
+                        //index of the list
+                        cache.put(String.valueOf(i), vertex);
+                    } else {
+                        this.graph.addVertex(
+                                Utils.assemble(
+                                        Utils.mapTopair(v.getRight()),
+                                        T.id, v.getMiddle(),
+                                        T.label, v.getLeft()));
+                    }
+                    i++;
                 }
-                String srcTargetIdStr = source.id() + ">" + target.id();
-                if (!edgeCache.contains(srcTargetIdStr)) {
-                    source.addEdge(label, target,Utils.mapTopair(e.getRight()));
-                    edgeCache.add(srcTargetIdStr);
+                HugeVertex source;
+                HugeVertex target;
+                for (Triple<Pair<String, String>, String, Map<String, Object>> e : edges) {
+                    Pair<String, String> srcTarget = e.getLeft();
+                    String label = e.getMiddle();
+                    if (cache.containsKey(srcTarget.getLeft())) {
+                        //系统自动创建id
+                        source = cache.get(srcTarget.getLeft());
+                    } else {
+                        //自定义id
+                        source = new HugeVertex(
+                                this.graph,
+                                IdGenerator.of(srcTarget.getLeft()),
+                                this.graph.vertexLabel(
+                                        TaiShiDataUtils.getVertexLabel(label, true)));
+                    }
+
+                    if (cache.containsKey(srcTarget.getRight())) {
+                        target = cache.get(srcTarget.getRight());
+                    } else {
+                        target = new HugeVertex(
+                                this.graph,
+                                IdGenerator.of(srcTarget.getRight()),
+                                this.graph.vertexLabel(
+                                        TaiShiDataUtils.getVertexLabel(label, false)));
+                    }
+                    String srcTargetIdStr = source.id() + ">" + target.id();
+                    if (!edgeCache.contains(srcTargetIdStr)) {
+                        source.addEdge(label, target, Utils.mapTopair(e.getRight()));
+                        edgeCache.add(srcTargetIdStr);
+                    }
                 }
+                this.graph.tx().commit();
+            } catch (Exception e) {
+                LOG.error("massive insert error",e);
             }
-            this.graph.tx().commit();
         });
     }
 }

@@ -16,6 +16,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.parboiled.common.Preconditions;
 
 import java.io.File;
 import java.io.IOException;
@@ -174,13 +175,54 @@ public class TaiShiDataTester
         customData.createGraph(dataFile, insertionBase, scenarioNumber);
     }
 
+    private static void test2(String id)
+    {
+        String[] parts = id.split("(?<!" + "`" + ")" + ">", -1);
+        for(int i=0;i<parts.length;i++){
+            System.out.println(i+":"+parts[i]);
+        }
+    }
+    public static String escape(char splitor, char escape, String... values) {
+        StringBuilder escaped = new StringBuilder((values.length + 1) << 4);
+        // Do escape for every item in values
+        for (String value : values) {
+            if (escaped.length() > 0) {
+                escaped.append(splitor);
+            }
+
+            if (value.indexOf(splitor) == -1) {
+                escaped.append(value);
+                continue;
+            }
+            //将values中包含的特殊字符splitor转义成escape+splitor
+            // Do escape for current item
+            for (int i = 0, n = value.length(); i < n; i++) {
+                char ch = value.charAt(i);
+                if (ch == splitor) {
+                    escaped.append(escape);
+                }
+                escaped.append(ch);
+            }
+        }
+        return escaped.toString();
+    }
+
+    public static void test2(Object... strs)
+    {
+        for (Object str : strs) {
+            System.out.println(str);
+        }
+    }
+
     public static void main(String[] args) throws IOException
     {
-        System.out.println(File.pathSeparator);
-        System.out.println(File.separator);
-        System.out.println("start TaiShi data massive insertion test!!");
-
+//        Preconditions.checkArgument(
+//                args.length == 3,
+//                "input args must be 3 : input.properties ,storeFile , dataDir !");
         TaiShiDataTester tester = new TaiShiDataTester();
+//        tester.input = args[0];
+//        tester.storeFile = args[1];
+//        tester.dir = args[2];
         File store = new File(tester.storeFile);
         File dataFile = new File(tester.dir);
         BenchmarkConfiguration conf = tester.benchmarkConf();
@@ -189,25 +231,26 @@ public class TaiShiDataTester
         //hugegraph
 //        HugeGraphCoreDatabase huge = new HugeGraphCoreDatabase(conf, store);
 //        tester.createSchema(huge.loadGraph(true).schema(), GraphDatabaseType.HUGEGRAPH_CORE);
-//        HugeGraphCoreMassiveInsertion hugeMassive = new HugeGraphCoreMassiveInsertion(huge.getGraph());
+//        HugeGraphCoreMassiveInsertion hugeMassive = new HugeGraphCoreMassiveInsertion(huge.getGraph(),true);
 //        tester.writeData(dataFile,hugeMassive);
-//        tester.checkWriteData(GraphDatabaseType.HUGEGRAPH_CORE);
+//        hugeMassive.post2();
+//        tester.checkWriteData(huge.getGraph().traversal());
 //        huge.shutdown();
 //        tester.createSchema(huge.loadGraph(true).schema(), GraphDatabaseType.HUGEGRAPH_CORE);
 //        tester.createGraph(dataFile, hugeMassive, 0);
-//        tester.checkWriteData(GraphDatabaseType.HUGEGRAPH_CORE);
+//        tester.checkWriteData(huge.getGraph().traversal());
 //        System.out.println("TaiShi data massive insertion test End!!");
-//        System.exit(1);
+
         //janusgraph
         JanusGraphCoreDatabase janus = new JanusGraphCoreDatabase(conf, store);
         tester.createSchema(janus.openGraph().openManagement(), GraphDatabaseType.JANUSGRAPH_CORE);
         JanusGraphCoreMassiveInsertion janusMassive = new JanusGraphCoreMassiveInsertion(janus.getGraph());
-//        tester.writeData(dataFile, janusMassive);
-//        janusMassive.post2();
+        tester.writeData(dataFile, janusMassive);
+        janusMassive.post2();
 //        tester.checkWriteData(janus.getGraph().traversal());
 //        janus.shutdown();
 //        tester.createSchema(janus.openGraph().openManagement(), GraphDatabaseType.JANUSGRAPH_CORE);
-        tester.createGraph(dataFile, janusMassive, 0);
+//        tester.createGraph(dataFile, janusMassive, 0);
         tester.checkWriteData(janus.getGraph().traversal());
         System.out.println("TaiShi data massive insertion test End!!");
     }

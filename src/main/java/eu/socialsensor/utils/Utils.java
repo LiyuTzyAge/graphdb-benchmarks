@@ -349,4 +349,26 @@ public class Utils
         }
         return re;
     }
+
+    public static Object[] assemble(Object[] arr, Object... arrs)
+    {
+        int length = arrs.length + arr.length;
+        Object[] re = new Object[length];
+        for (int i = 0; i < length; i++) {
+            if (i < arrs.length) {
+                re[i] = arrs[i];
+            } else {
+                re[i] = arr[i - arrs.length];
+            }
+        }
+        return re;
+    }
+
+    public static void main(String[] args)
+    {
+        Object[] arr = new Object[]{"aaa", "bbb"};
+        Object[] re = assemble(arr, "1111", "222");
+        System.out.println(Arrays.toString(re));
+
+    }
 }

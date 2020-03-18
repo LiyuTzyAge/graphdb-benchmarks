@@ -97,6 +97,8 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
     }
 
     private void batchCommit() {
+        //有时数据无法写入，可能是外面线程写入顶点的缓存没有提交
+        this.graph.tx().commit();
 //        List<Integer> vs = this.vertices;
         List<Pair<Vertex, Vertex>> es = this.edges;
 
@@ -150,6 +152,7 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public void post2()
@@ -186,9 +189,10 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
 
     private ConcurrentHashSet<String> edgeCache = new ConcurrentHashSet<>();
     private void batchCommit2() {
+        //有时数据无法写入，可能是外面线程写入顶点的缓存没有提交
+        this.graph.tx().commit();
 //        List<Integer> vs = this.vertices;
         List<Triple<String,Pair<Vertex, Vertex>,Map<String,Object>>> es = this.edges2;
-
         this.pool.submit(() -> {
             try {
                 for (Triple<String,Pair<Vertex, Vertex>,Map<String,Object>> e : es) {
