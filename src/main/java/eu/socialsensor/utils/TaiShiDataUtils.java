@@ -9,6 +9,7 @@ import eu.socialsensor.insert.InsertionBase;
 import eu.socialsensor.main.GraphDatabaseType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -63,6 +64,7 @@ public class TaiShiDataUtils implements Custom
     public static final String ATTACK_EDGE = "attack";
     public static final String VICTIM = "victim";
     public static final String DPORT = "dport";
+
     public static final String IPTOATT = "iptoatt";
     public static final String IPTOSIP = "iptosip";
     public static final String STOATT = "stoatt";
@@ -131,7 +133,7 @@ public class TaiShiDataUtils implements Custom
         huge.indexLabel("uri").onV(ATTACK_EDGE).by(URI).secondary().ifNotExist().create();
         huge.indexLabel("write_date").onV(ATTACK_EDGE).by(WRITE_DATE).range().ifNotExist().create();
         huge.indexLabel("edge_write_date").onE(ATOATT).by(WRITE_DATE).range().ifNotExist().create();
-    }
+}
 
     private static Map<String, Pair<String, String>> edgeLabelMap = new HashMap<>();
     static {
@@ -212,6 +214,35 @@ public class TaiShiDataUtils implements Custom
         janus.commit();
     }
 
+    public void checkData(TaiShiDataset dataset)
+    {
+        String attacker = dataset.getAttacker();
+        String sip = dataset.getSip();
+        String dip = dataset.getDip();
+        String victim = dataset.getVictim();
+        String uri = dataset.getUri();
+        Integer attack_type_id = dataset.getAttack_type_id();
+        Integer rule_id = dataset.getRule_id();
+        Long write_date = dataset.getWrite_date();
+        checkEmpty(attacker, sip, dip, victim, uri);
+        checkEmpty(attack_type_id,rule_id,write_date);
+    }
+
+    private static void checkEmpty(String... value)
+    {
+        for (String s : value) {
+            s = StringUtils.trim(s);
+            Preconditions.checkArgument(StringUtils.isNoneBlank(s) && !"\u0001".equals(s) &&!"\u0000".equals(s));
+        }
+    }
+
+
+    private static void checkEmpty(Number... value)
+    {
+        for (Number number : value) {
+            Preconditions.checkArgument(number.intValue() != 0);
+        }
+    }
 
 
     /**
@@ -879,6 +910,7 @@ public class TaiShiDataUtils implements Custom
     {
         Preconditions.checkArgNotNull(lineData, "taishi data line is null");
         TaiShiDataset line = (TaiShiDataset) lineData;
+        checkData(line);
         Timer getOrCreateTimes = insertionBase.getOrCreateTimes;
         Timer relateNodesTimes = insertionBase.relateNodesTimes;
 
@@ -992,4 +1024,11 @@ public class TaiShiDataUtils implements Custom
         }
     }
 
+    public static void main(String[] args)
+    {
+        Preconditions.checkArgument(StringUtils.isNoneBlank(" "));
+        TaiShiDataUtils utils = new TaiShiDataUtils();
+        TaiShiDataUtils.TaiShiDataset dataset = new TaiShiDataset();
+        utils.checkData(dataset);
+    }
 }

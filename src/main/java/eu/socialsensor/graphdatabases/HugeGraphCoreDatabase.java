@@ -117,7 +117,8 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
 
     @Override
     public Iterator<Edge> getNeighborsOfVertex(HugeVertex v) {
-        return v.edges(Direction.BOTH, SIMILAR);
+        return v.edges(Direction.BOTH);
+//        return v.edges(Direction.BOTH, SIMILAR);
     }
 
     @Override
@@ -244,10 +245,14 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
                   counter, fromNode.id(), node);
         counter++;
         ShortestPathTraverser traverser = new ShortestPathTraverser(this.graph);
+//        List<Id> path = traverser.shortestPath(fromNode.id(),
+//                                               IdGenerator.of(node.longValue()),
+//                                               Directions.OUT, SIMILAR, 5,
+//                                               -1, 0, -1);
         List<Id> path = traverser.shortestPath(fromNode.id(),
-                                               IdGenerator.of(node.longValue()),
-                                               Directions.OUT, SIMILAR, 5,
-                                               -1, 0, -1);
+                IdGenerator.of(node.longValue()),
+                Directions.OUT, null, 5,
+                -1, 0, -1);
         LOG.debug("{}", path);
     }
 

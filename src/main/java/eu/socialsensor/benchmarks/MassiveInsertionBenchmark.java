@@ -80,7 +80,7 @@ public class MassiveInsertionBenchmark extends PermutingBenchmarkBase implements
                 graphDatabase.massiveModeLoading(bench.getDataset());
             }
         } catch (Exception e) {
-            logger.error("massive insertion benchmark error",e.getMessage());
+            logger.error("massive insertion benchmark error",e);
         }
         logger.debug("Shutdown massive graph in database type {}", type.getShortname());
         graphDatabase.shutdownMassiveGraph();

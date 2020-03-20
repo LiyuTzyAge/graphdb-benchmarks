@@ -46,7 +46,9 @@ import javax.annotation.Nullable;
 
 public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String> {
 
-    private static final int EDGE_BATCH_NUMBER = 250;
+    //需要是自定义taishi数据集edge的整数倍,9*n
+    // 否者batchCommit2时，刷新vertices2，导致id=null的vertex，id无法对应cache中的vertex
+    private static final int EDGE_BATCH_NUMBER = 270;
 
     private ExecutorService pool = Executors.newFixedThreadPool(8);
 
@@ -60,6 +62,7 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
     private final HugeGraph graph;
     private final VertexLabel vl;
     private static final Logger LOG = LogManager.getLogger();
+    private static final boolean debug = LOG.isDebugEnabled();
 
     public HugeGraphCoreMassiveInsertion(HugeGraph graph) {
         super(GraphDatabaseType.HUGEGRAPH_CORE, null);
@@ -194,6 +197,7 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
         List<Triple<Pair<String,String>,String, Map<String,Object>>> edges = this.edges2;
 
         this.pool.submit(() -> {
+
             try {
                 Map<String, HugeVertex> cache = new HashMap<>();
                 int i = 0;
@@ -213,13 +217,16 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
                     }
                     i++;
                 }
+                int atoatt = 0;
+                int atodport = 0;
+                int atoatt2 = 0;
+                int atodport2 = 0;
                 HugeVertex source;
                 HugeVertex target;
                 for (Triple<Pair<String, String>, String, Map<String, Object>> e : edges) {
                     Pair<String, String> srcTarget = e.getLeft();
                     String label = e.getMiddle();
                     if (cache.containsKey(srcTarget.getLeft())) {
-                        //系统自动创建id
                         source = cache.get(srcTarget.getLeft());
                     } else {
                         //自定义id
@@ -233,18 +240,47 @@ public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String>
                     if (cache.containsKey(srcTarget.getRight())) {
                         target = cache.get(srcTarget.getRight());
                     } else {
+                        //自定义id
                         target = new HugeVertex(
                                 this.graph,
                                 IdGenerator.of(srcTarget.getRight()),
                                 this.graph.vertexLabel(
                                         TaiShiDataUtils.getVertexLabel(label, false)));
                     }
-                    String srcTargetIdStr = source.id() + ">" + target.id();
+                    String srcTargetIdStr = source.id() + "=" + target.id();
+                    if (debug) {
+                        if (label.equals("atoatt")) {
+                            atoatt++;
+                        }
+                        if (label.equals("atodport")) {
+                            atodport++;
+                        }
+                    }
                     if (!edgeCache.contains(srcTargetIdStr)) {
                         source.addEdge(label, target, Utils.mapTopair(e.getRight()));
                         edgeCache.add(srcTargetIdStr);
+                        if (debug) {
+                            if (label.equals("atoatt")) {
+                                atoatt2++;
+                            }
+                            if (label.equals("atodport")) {
+                                atodport2++;
+                            }
+                        }
+                    }else {
+                        if (debug &&
+                                (label.equals("atoatt") ||
+                                 label.equals("atodport"))) {
+
+                            LOG.debug("[x] dup edge label {} id {}", label, srcTargetIdStr);
+                        }
                     }
                 }
+                if (debug) {
+                   LOG.debug("[x] all atoatt edge = {} ,atodport = {}", atoatt, atodport);
+                    LOG.debug("[x] add edge atoatt = {} , atodport = {}", atoatt2, atodport2);
+                }
+
                 this.graph.tx().commit();
             } catch (Exception e) {
                 LOG.error("massive insert error",e);

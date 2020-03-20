@@ -88,7 +88,8 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     @Override
     public Iterator<Edge> getNeighborsOfVertex(Vertex v)
     {
-        return v.edges(Direction.BOTH, SIMILAR);
+        return v.edges(Direction.BOTH);
+//        return v.edges(Direction.BOTH, SIMILAR);
     }
 
     @Override

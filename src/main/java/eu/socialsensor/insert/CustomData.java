@@ -1,5 +1,6 @@
 package eu.socialsensor.insert;
 
+import com.alibaba.fastjson.JSONException;
 import com.google.common.base.Stopwatch;
 import eu.socialsensor.benchmarks.SingleInsertionBenchmark;
 import eu.socialsensor.utils.Utils;
@@ -22,6 +23,7 @@ public class CustomData
 {
 
     private static final Logger LOG = LogManager.getLogger();
+    private static long error = 0L;
 
     private final Custom custom;
     public CustomData(Custom custom)
@@ -46,8 +48,14 @@ public class CustomData
         watch.start();
         int i = 4;
         while (iterator.hasNext()) {
-            Object line = iterator.next();
-            custom.writeData(line,insertionBase);
+            Object line =null;
+            try {
+                line = iterator.next();
+                custom.writeData(line,insertionBase);
+            } catch (JSONException | IllegalArgumentException e) {
+                error++;
+                continue;
+            }
             if (i % 1000 == 0)
             {
                 insertionBase.insertionTimes.add((double) thousandWatch.elapsed(TimeUnit.MILLISECONDS));
@@ -74,6 +82,7 @@ public class CustomData
                     )
             );
         }
+        LOG.info("error data line num is {}",error);
     }
 
     public Custom getCustom()

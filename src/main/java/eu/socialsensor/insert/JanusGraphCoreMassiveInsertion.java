@@ -42,7 +42,7 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
 //    private volatile List<Integer> vertices;
     private volatile List<Pair<Vertex, Vertex>> edges;
     private volatile List<Triple<String,Pair<Vertex, Vertex>,Map<String,Object>>> edges2;
-    private static final int EDGE_BATCH_NUMBER = 500;
+    private static final int EDGE_BATCH_NUMBER = 270;
     private ExecutorService pool = Executors.newFixedThreadPool(8);
     private static final Logger LOG = LogManager.getLogger();
     public JanusGraphCoreMassiveInsertion(JanusGraph graph)
