@@ -246,6 +246,12 @@ public class TitanGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     }
 
     @Override
+    public void createGraphForSingleLoad(Custom custom)
+    {
+        throw new RuntimeException("not support !");
+    }
+
+    @Override
     public void createGraphForMassiveLoad()
     {
         open(true /* batchLoading */);
@@ -268,6 +274,12 @@ public class TitanGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     {
         Insertion titanSingleInsertion = new TitanSingleInsertion(this.titanGraph, type, resultsPath);
         titanSingleInsertion.createGraph(dataPath, scenarioNumber);
+    }
+
+    @Override
+    public void singleModeLoading(File dataPath, CustomData customData, File resultsPath, int scenarioNumber)
+    {
+        throw new RuntimeException("not support !");
     }
 
     @Override

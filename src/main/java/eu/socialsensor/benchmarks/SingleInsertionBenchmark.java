@@ -1,6 +1,8 @@
 package eu.socialsensor.benchmarks;
 
 import eu.socialsensor.graphdatabases.GraphDatabase;
+import eu.socialsensor.insert.Custom;
+import eu.socialsensor.insert.CustomData;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.BenchmarkType;
 import eu.socialsensor.main.GraphDatabaseType;
@@ -11,6 +13,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.parboiled.common.Preconditions;
 
 /**
  * SingleInsertionBenchmak implementation
@@ -48,10 +51,46 @@ public class SingleInsertionBenchmark extends PermutingBenchmarkBase implements 
     public void benchmarkOne(GraphDatabaseType type, int scenarioNumber)
     {
         GraphDatabase<?,?,?,?> graphDatabase = Utils.createDatabaseInstance(bench, type);
-        graphDatabase.createGraphForSingleLoad();
+
+        //custom dataset
+        CustomData customData = null;
+        File customDataset = null;
+        if (bench.isCustomDataset()) {
+            Class<Custom> customDataClass = bench.getCustomDataClass();
+            customDataset = bench.getCustomDataset();
+            Preconditions.checkArgNotNull(
+                    customDataset, "dataset is null");
+            Preconditions.checkArgNotNull(
+                    customDataClass, "custom class is null");
+            LOG.debug(String.format(
+                    "Single insertion custom dataset %s",
+                    bench.getCustomDataset().getName()));
+            try {
+                customData = new CustomData(customDataClass.newInstance());
+            } catch (IllegalAccessException | InstantiationException e) {
+                throw new RuntimeException("Single custom class instance faild", e);
+            }
+            graphDatabase.createGraphForSingleLoad(customData.getCustom());
+            LOG.debug("Custom load graph in database type {}", type.getShortname());
+        } else {
+            // the following step includes provisioning in managed database
+            // services. do not measure this time as
+            // it is not related to the action of inserting.
+            graphDatabase.createGraphForSingleLoad();
+            LOG.debug("Single load graph in database type {}", type.getShortname());
+        }
+
         // reset start time ,skip the time of totalTimeMap
         super.totalTimeMap.put(type, System.currentTimeMillis());
-        graphDatabase.singleModeLoading(bench.getDataset(), bench.getResultsPath(), scenarioNumber);
+        try {
+            if (bench.isCustomDataset()) {
+                graphDatabase.singleModeLoading(customDataset, customData, bench.getResultsPath(), scenarioNumber);
+            } else {
+                graphDatabase.singleModeLoading(bench.getDataset(), bench.getResultsPath(), scenarioNumber);
+            }
+        } catch (Exception e) {
+            LOG.error("single insertion benchmark error",e);
+        }
         graphDatabase.shutdown();
     }
 }

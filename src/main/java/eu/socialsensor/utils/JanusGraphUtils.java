@@ -203,6 +203,12 @@ public class JanusGraphUtils
         return vertex.orElse(null);
     }
 
+    public static Vertex getVertexAutoId(JanusGraph graph,String lable,String key, String idValue)
+    {
+        Optional<Vertex> vertex = graph.traversal().V().hasLabel(lable).has(key, idValue).tryNext();
+        return vertex.orElse(null);
+    }
+
     /**
      * 删除图数据
      * 已测

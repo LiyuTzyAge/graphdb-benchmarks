@@ -116,6 +116,12 @@ public class SparkseeGraphDatabase extends GraphDatabaseBase<ObjectsIterator, Ob
     }
 
     @Override
+    public void createGraphForSingleLoad(Custom custom)
+    {
+        throw new RuntimeException("not support !");
+    }
+
+    @Override
     public void createGraphForMassiveLoad()
     {
         // maybe some more configuration?
@@ -165,6 +171,12 @@ public class SparkseeGraphDatabase extends GraphDatabaseBase<ObjectsIterator, Ob
     {
         Insertion sparkseeSingleInsertion = new SparkseeSingleInsertion(this.session, resultsPath);
         sparkseeSingleInsertion.createGraph(dataPath, scenarioNumber);
+    }
+
+    @Override
+    public void singleModeLoading(File dataPath, CustomData customData, File resultsPath, int scenarioNumber)
+    {
+        throw new RuntimeException("not support !");
     }
 
     @Override

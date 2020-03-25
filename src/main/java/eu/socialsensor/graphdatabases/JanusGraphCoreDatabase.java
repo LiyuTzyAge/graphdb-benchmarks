@@ -171,6 +171,15 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     }
 
     @Override
+    public void createGraphForSingleLoad(Custom custom)
+    {
+        open(false);
+        clear(true);
+        open(false);
+        custom.createSchema(this.graph.openManagement(), GraphDatabaseType.JANUSGRAPH_CORE);
+    }
+
+    @Override
     public void massiveModeLoading(File dataPath)
     {
         JanusGraphCoreMassiveInsertion ji = new JanusGraphCoreMassiveInsertion(this.graph);
@@ -189,6 +198,13 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     {
         JanusGraphCoreSingleInsertion si = new JanusGraphCoreSingleInsertion(this.graph,resultsPath);
         si.createGraph(dataPath,scenarioNumber);
+    }
+
+    @Override
+    public void singleModeLoading(File dataPath, CustomData customData, File resultsPath, int scenarioNumber)
+    {
+        JanusGraphCoreSingleInsertion si = new JanusGraphCoreSingleInsertion(this.graph,resultsPath);
+        customData.createGraph(dataPath, si, scenarioNumber);
     }
 
     @Override

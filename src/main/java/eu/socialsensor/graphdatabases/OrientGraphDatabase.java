@@ -70,6 +70,12 @@ public class OrientGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Ite
         createSchema();
     }
 
+    @Override
+    public void createGraphForSingleLoad(Custom custom)
+    {
+        throw new RuntimeException("not support !");
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public void createGraphForMassiveLoad()
@@ -97,6 +103,12 @@ public class OrientGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Ite
     {
         Insertion orientSingleInsertion = new OrientSingleInsertion(this.graph, resultsPath);
         orientSingleInsertion.createGraph(dataPath, scenarioNumber);
+    }
+
+    @Override
+    public void singleModeLoading(File dataPath, CustomData customData, File resultsPath, int scenarioNumber)
+    {
+        throw new RuntimeException("not support !");
     }
 
     @Override

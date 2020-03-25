@@ -84,9 +84,7 @@ public abstract class InsertionBase<T,E> implements Insertion
     /**
      * 加载自定义类型数据
      * 使用需自行实现
-     * 如果id=null，则没有id
-     * 如果properties=null,则没有属性
-     * 如果id,properties=null,则只创建一个vertex
+     * 如果id=null，则没有id，无主键，顶点id自动分配
      * @param id
      * @param properties
      * @return

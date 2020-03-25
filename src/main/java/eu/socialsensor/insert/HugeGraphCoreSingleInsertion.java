@@ -21,16 +21,25 @@ package eu.socialsensor.insert;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
 
+import com.baidu.hugegraph.structure.HugeVertex;
+import eu.socialsensor.utils.Utils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import com.baidu.hugegraph.HugeGraph;
-import com.baidu.hugegraph.structure.constant.T;
 import eu.socialsensor.graphdatabases.HugeGraphDatabase;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.HugeGraphUtils;
 
-public class HugeGraphCoreSingleInsertion extends InsertionBase<Vertex,Object> {
+import javax.annotation.Nullable;
+
+public class HugeGraphCoreSingleInsertion extends InsertionBase<Vertex,Vertex> {
 
     private final HugeGraph graph;
 
@@ -62,5 +71,63 @@ public class HugeGraphCoreSingleInsertion extends InsertionBase<Vertex,Object> {
     protected void relateNodes(Vertex src, Vertex dest) {
         src.addEdge(HugeGraphDatabase.SIMILAR, dest);
         this.graph.tx().commit();
+    }
+
+    /*
+    custom dataset
+     */
+
+    @Override
+    public Vertex getOrCreateCust(String label, @Nullable String id, Map<String, Object> properties)
+    {
+        Iterator<Vertex> vertices = null;
+        if(Objects.nonNull(id)){
+            //get vertex
+            vertices = this.graph.vertices(id);
+            if (vertices.hasNext()) {
+                return vertices.next();
+            }
+        }
+
+        try {
+            if (Objects.isNull(id)) {
+                //add vertex dirct
+                return this.graph.addVertex(
+                        Utils.assemble(Utils.mapTopair(properties), T.label, label));
+            } else {
+                return this.graph.addVertex(
+                        Utils.assemble(
+                                Utils.mapTopair(properties),
+                                T.id, id,
+                                T.label, label));
+            }
+        }finally {
+            this.graph.tx().commit();
+        }
+    }
+
+    @Override
+    public void relateNodesCust(String label,final  Vertex src,final  Vertex dest,Map<String,Object> properties)
+    {
+        //get or create : edge is single
+        Iterator<Edge> edges = src.edges(Direction.OUT, label);
+        if (!edgeHasExist(edges,dest)) {
+            src.addEdge(label, dest, Utils.mapTopair(properties));
+            this.graph.tx().commit();
+        }
+
+    }
+
+    private static boolean edgeHasExist(Iterator<Edge> edges,final  Vertex dest)
+    {
+        if (!edges.hasNext()) {
+            return false;
+        }
+        while (edges.hasNext()) {
+            if (edges.next().inVertex().equals(dest)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

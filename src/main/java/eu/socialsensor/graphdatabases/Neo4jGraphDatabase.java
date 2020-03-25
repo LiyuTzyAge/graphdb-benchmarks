@@ -109,6 +109,12 @@ public class Neo4jGraphDatabase extends GraphDatabaseBase<Iterator<Node>, Iterat
     }
 
     @Override
+    public void createGraphForSingleLoad(Custom custom)
+    {
+        throw new RuntimeException("not support !");
+    }
+
+    @Override
     public void createGraphForMassiveLoad()
     {
         Map<String, String> config = new HashMap<String, String>();
@@ -135,6 +141,12 @@ public class Neo4jGraphDatabase extends GraphDatabaseBase<Iterator<Node>, Iterat
     {
         Insertion neo4jSingleInsertion = new Neo4jSingleInsertion(this.neo4jGraph, resultsPath);
         neo4jSingleInsertion.createGraph(dataPath, scenarioNumber);
+    }
+
+    @Override
+    public void singleModeLoading(File dataPath, CustomData customData, File resultsPath, int scenarioNumber)
+    {
+        throw new RuntimeException("not support !");
     }
 
     @Override

@@ -2,10 +2,7 @@ package eu.socialsensor.graphdatabases;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import eu.socialsensor.insert.CustomData;
-import eu.socialsensor.insert.InsertionBase;
-import eu.socialsensor.insert.JanusgraphMassiveInsertion;
-import eu.socialsensor.insert.JanusgraphSingleInsertion;
+import eu.socialsensor.insert.*;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.GraphDatabaseType;
 import eu.socialsensor.utils.JanusGraphClient;
@@ -142,6 +139,12 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     }
 
     @Override
+    public void createGraphForSingleLoad(Custom custom)
+    {
+        throw new RuntimeException("not support !");
+    }
+
+    @Override
     public void massiveModeLoading(File dataPath)
     {
         JanusgraphMassiveInsertion insertion =
@@ -164,6 +167,12 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
                 new JanusgraphSingleInsertion(
                 this.client, resultsPath);
         insertion.createGraph(dataPath, scenarioNumber);
+    }
+
+    @Override
+    public void singleModeLoading(File dataPath, CustomData customData, File resultsPath, int scenarioNumber)
+    {
+        throw new RuntimeException("not support !");
     }
 
     @Override

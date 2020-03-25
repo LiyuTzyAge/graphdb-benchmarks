@@ -198,12 +198,28 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
     }
 
     @Override
+    public void createGraphForSingleLoad(Custom custom)
+    {
+        this.graph = loadGraph(true);
+        this.g = this.graph.traversal();
+        custom.createSchema(this.graph.schema(),GraphDatabaseType.HUGEGRAPH_CORE);
+    }
+
+    @Override
     public void singleModeLoading(File dataPath,
                                   File resultsPath,
                                   int scenarioNumber) {
         HugeGraphCoreSingleInsertion insertion =
                 new HugeGraphCoreSingleInsertion(this.graph, resultsPath);
         insertion.createGraph(dataPath, scenarioNumber);
+    }
+
+    @Override
+    public void singleModeLoading(File dataPath, CustomData customData, File resultsPath, int scenarioNumber)
+    {
+        HugeGraphCoreSingleInsertion insertion =
+                new HugeGraphCoreSingleInsertion(this.graph, resultsPath);
+        customData.createGraph(dataPath,insertion,scenarioNumber);
     }
 
     /* FN, FA, FS and CW */

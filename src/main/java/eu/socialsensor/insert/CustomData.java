@@ -53,6 +53,7 @@ public class CustomData
                 line = iterator.next();
                 custom.writeData(line,insertionBase);
             } catch (JSONException | IllegalArgumentException e) {
+                LOG.error("error data line ", e);
                 error++;
                 continue;
             }

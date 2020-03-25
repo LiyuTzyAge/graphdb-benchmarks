@@ -56,6 +56,8 @@ public interface GraphDatabase<VertexIteratorType, EdgeIteratorType, VertexType,
      */
     public void createGraphForSingleLoad();
 
+    public void createGraphForSingleLoad(Custom custom);
+
     /**
      * Inserts data in massive mode
      * 
@@ -76,6 +78,7 @@ public interface GraphDatabase<VertexIteratorType, EdgeIteratorType, VertexType,
      */
     public void singleModeLoading(File dataPath, File resultsPath, int scenarioNumber);
 
+    public void singleModeLoading(File dataPath,CustomData customData, File resultsPath, int scenarioNumber);
     /**
      * Creates a graph database and configures for bulk data insertion
      * 

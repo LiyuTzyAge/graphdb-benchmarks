@@ -162,6 +162,7 @@ public class TaiShiDataUtils implements Custom
      */
     public void createSchema(JanusGraphManagement janus)
     {
+        PropertyKey key = getOrCreatePropertyKey(janus, "kk", String.class, Cardinality.SINGLE);
         PropertyKey ip = getOrCreatePropertyKey(janus, IP, String.class, Cardinality.SINGLE);
         PropertyKey write_date = getOrCreatePropertyKey(janus, WRITE_DATE, Long.class, Cardinality.SINGLE);
         PropertyKey kill_chain = getOrCreatePropertyKey(janus, KILL_CHAIN, String.class, Cardinality.SINGLE);
@@ -185,13 +186,12 @@ public class TaiShiDataUtils implements Custom
 
         //vertex label
         VertexLabel server = (VertexLabel) createLabel(janus, SERVER, true);
-        createLabel(janus, SIP, true);
-        createLabel(janus, DIP, true);
-        createLabel(janus, ATTACKER, true);
+        VertexLabel sip = (VertexLabel) createLabel(janus, SIP, true);
+        VertexLabel dip = (VertexLabel) createLabel(janus, DIP, true);
+        VertexLabel attacker = (VertexLabel) createLabel(janus, ATTACKER, true);
         VertexLabel attack_edge = (VertexLabel) createLabel(janus, ATTACK_EDGE, true);
-        createLabel(janus, DPORT, true);
-        createLabel(janus, VICTIM, true);
-        createLabel(janus, DIP, true);
+        VertexLabel dport_label = (VertexLabel) createLabel(janus, DPORT, true);
+        VertexLabel victim = (VertexLabel) createLabel(janus, VICTIM, true);
         //edge label
         createLabel(janus, IPTOATT, false);
         createLabel(janus, IPTOSIP, false);
@@ -203,6 +203,13 @@ public class TaiShiDataUtils implements Custom
         createLabel(janus, DPORTTOVIC, false);
         createLabel(janus, DIPTOVIC, false);
 
+        //add primtive key for single insert
+        buildVertexCompositeIndex(janus, "sip", true, sip, key);
+        buildVertexCompositeIndex(janus, "dip", true, dip, key);
+        buildVertexCompositeIndex(janus, "attacker", true, attacker, key);
+        buildVertexCompositeIndex(janus, "dport_label", true, dport_label, key);
+        buildVertexCompositeIndex(janus, "victim", true, victim, key);
+        //server is not need key
         buildVertexCompositeIndex(janus, "ip", true, server, ip);
         buildVertexCompositeIndex(janus, "attack_type_id", false,
                                   attack_edge, attack_type_id);
@@ -213,6 +220,16 @@ public class TaiShiDataUtils implements Custom
              .addKey(write_date).buildCompositeIndex();
         janus.commit();
     }
+
+    public static String keyName(String label)
+    {
+        if (label.equals(SERVER)) {
+            return "ip";
+        } else {
+            return "kk";
+        }
+    }
+
 
     public void checkData(TaiShiDataset dataset)
     {

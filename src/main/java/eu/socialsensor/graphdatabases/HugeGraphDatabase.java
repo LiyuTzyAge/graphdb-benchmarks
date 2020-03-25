@@ -33,8 +33,7 @@ import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.structure.constant.T;
 import com.baidu.hugegraph.type.define.Directions;
 import com.codahale.metrics.Timer;
-import eu.socialsensor.insert.CustomData;
-import eu.socialsensor.insert.InsertionBase;
+import eu.socialsensor.insert.*;
 import eu.socialsensor.utils.HugeGraphUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,8 +53,6 @@ import com.baidu.hugegraph.structure.constant.Direction;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
-import eu.socialsensor.insert.HugeGraphMassiveInsertion;
-import eu.socialsensor.insert.HugeGraphSingleInsertion;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.GraphDatabaseType;
 import org.parboiled.common.ImmutableList;
@@ -224,12 +221,24 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
     }
 
     @Override
+    public void createGraphForSingleLoad(Custom custom)
+    {
+        throw new RuntimeException("not support !");
+    }
+
+    @Override
     public void singleModeLoading(File dataPath,
                                   File resultsPath,
                                   int scenarioNumber) {
         HugeGraphSingleInsertion insertion = new HugeGraphSingleInsertion(
                 this.hugeClient.graph(), resultsPath);
         insertion.createGraph(dataPath, scenarioNumber);
+    }
+
+    @Override
+    public void singleModeLoading(File dataPath, CustomData customData, File resultsPath, int scenarioNumber)
+    {
+        throw new RuntimeException("not support !");
     }
 
     /* FN, FA, FS or CW */
