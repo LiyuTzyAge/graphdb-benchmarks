@@ -64,7 +64,6 @@ community() {
 run() {
     # modify configuration
     sed -i "s/eu.socialsensor.results-path=results/eu.socialsensor.results-path=results\/$prefix/g" $CONF_FILE
-    #?????????????????
     sed -i "s/^#eu.socialsensor.benchmarks=MASSIVE_INSERTION/eu.socialsensor.benchmarks=MASSIVE_INSERTION/g" $CONF_FILE
     if [ $1 -lt 5 ]; then
         sed -i "s/^#eu.socialsensor.dataset=data\/$data/eu.socialsensor.dataset=data\/$data/g" $CONF_FILE

@@ -66,7 +66,11 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
         Vertex vertex;
         Integer v = Integer.valueOf(value.trim());
         if (!this.allVerticesMap.containsKey(v)) {
-            //this.vertices.add(v);
+            /*
+            janusgraph操作vertex存在两种方式
+            1. 根据自定义id，创建顶点
+            2. 系统自动分配id
+             */
             vertex = JanusGraphUtils.addVertex(this.graph, v.longValue());
             this.allVerticesMap.put(v, vertex);
         } else {
@@ -77,7 +81,6 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
     }
 
     private void reset() {
-//        this.vertices = new ArrayList<>();
         this.edges = new ArrayList<>(EDGE_BATCH_NUMBER);
     }
 
@@ -96,29 +99,18 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
         }
     }
 
+    /**
+     * 批量模式即使vertex不存在,
+     * getVertex by id也会返回vertex，
+     * 因一致性检查被关闭
+     */
     private void batchCommit() {
-        //有时数据无法写入，可能是外面线程写入顶点的缓存没有提交
         this.graph.tx().commit();
-//        List<Integer> vs = this.vertices;
         List<Pair<Vertex, Vertex>> es = this.edges;
 
         this.pool.submit(() -> {
             try {
-//                for (Integer v : vs) {
-//                    if (v < 20) {
-//                        System.out.println("====commmit===" + v);
-//                    }
-//                    //批量模式无法使用getVertex，一致性检查被关闭
-//                    JanusGraphUtils.addVertex(this.graph, v.longValue());
-//                }
-//                Vertex source;
-//                Vertex target;
                 for (Pair<Vertex, Vertex> e : es) {
-                    //并发情况下可能 vertex还未写入，产生NullPointException,如果写入够快则不会
-                    //可以先写点再写边
-//                    source = JanusGraphUtils.getVertex(this.graph, e.getLeft().longValue());
-//                    target = JanusGraphUtils.getVertex(this.graph, e.getRight().longValue());
-//                    source.addEdge(JanusGraphCoreDatabase.SIMILAR, target);
                     e.getLeft().addEdge(JanusGraphCoreDatabase.SIMILAR, e.getRight());
                 }
                 this.graph.tx().commit();
@@ -127,6 +119,11 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
             }
         });
     }
+    /**
+     * 批量模式即使vertex不存在,
+     * getVertex by id也会返回vertex，
+     * 因一致性检查被关闭
+     */
     private Vertex getVertex(JanusGraphTransaction tx,Long id)
     {
         return tx.getVertex(JanusGraphUtils.toVertexId(graph, id));
@@ -169,7 +166,6 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
             return JanusGraphUtils.addVertex(this.graph, label, properties);
         }
         if (!this.allVerticesMap2.containsKey(id)) {
-            //this.vertices.add(v);
             vertex = JanusGraphUtils.addVertex(this.graph, label, properties);
             this.allVerticesMap2.put(id, vertex);
         } else {
@@ -189,9 +185,7 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
 
     private ConcurrentHashSet<String> edgeCache = new ConcurrentHashSet<>();
     private void batchCommit2() {
-        //有时数据无法写入，可能是外面线程写入顶点的缓存没有提交
         this.graph.tx().commit();
-//        List<Integer> vs = this.vertices;
         List<Triple<String,Pair<Vertex, Vertex>,Map<String,Object>>> es = this.edges2;
         this.pool.submit(() -> {
             try {
@@ -214,7 +208,7 @@ public class JanusGraphCoreMassiveInsertion extends InsertionBase<Vertex,Vertex>
 
     public static void main(String[] args) throws BackendException
     {
-        JanusGraph graph = JanusGraphUtils.createGraph(false, "E:\\ideahouse\\hugeGraph\\benchmarks\\graphdb-benchmarks\\janusgraph.properties");
+        JanusGraph graph = JanusGraphUtils.createGraph(false, "conf/janusgraph.properties");
         JanusGraphCoreMassiveInsertion testGraph = new JanusGraphCoreMassiveInsertion(graph);
         createSchema(graph);
         Random r = new Random();

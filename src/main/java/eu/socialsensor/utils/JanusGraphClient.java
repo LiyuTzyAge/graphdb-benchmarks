@@ -30,7 +30,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
  *  @date: 2020/3/3
  *  @version: V1.0
  *
- * @Description:
+ * @Description: janusgraph client
  */
 public class JanusGraphClient
 {
@@ -70,7 +70,7 @@ public class JanusGraphClient
     }
 
     /**
-     * 迁移到HiveGraphSchema中，完成后删除此模块
+     * gremlin cql of create schema
      * @return
      */
     private String createSchemaRequest()

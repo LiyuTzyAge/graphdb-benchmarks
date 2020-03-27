@@ -44,6 +44,11 @@ public class JanusGraphCoreSingleInsertion  extends InsertionBase<Vertex,Vertex>
     {
         try {
             Integer id = Integer.valueOf(value.trim());
+            /*
+            janusgraph操作vertex存在两种方式
+            1. 根据自定义id，创建顶点
+            2. 系统自动分配id
+             */
             Vertex vertex = JanusGraphUtils.getVertex(this.graph, id.longValue());
             if (null == vertex) {
                 vertex = JanusGraphUtils.addVertex(this.graph, id.longValue());

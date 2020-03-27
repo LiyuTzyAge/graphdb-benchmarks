@@ -37,10 +37,10 @@ public class TaiShiDataTester
 {
     private TaiShiDataUtils taishi = new TaiShiDataUtils();
     public static final MetricRegistry metrics = new MetricRegistry();
-    String input = "E:/ideahouse/hugeGraph/benchmarks/graphdb-benchmarks/input.properties";
-    String storeFile = "E:/test/store";
+    String input = "graphdb-benchmarks/input.properties";
+    String storeFile = "test/store";
     //Dir
-    String dir = "E:\\360\\graph研究\\benchmarks";
+    String dir = "data/benchmarks";
     //file
     String file = "taishi_dataset_test1.txt";
 //    HugeGraphCoreDatabase hugeCore;
@@ -85,10 +85,6 @@ public class TaiShiDataTester
 
     private void readLine()
     {
-        //Dir
-        String dir = "E:\\360\\graph研究\\benchmarks";
-        //file
-        String file = "taishi_dataset_test1.txt";
         File d = new File(dir);
         File f = new File(dir + File.separator + file);
 
@@ -175,44 +171,6 @@ public class TaiShiDataTester
         customData.createGraph(dataFile, insertionBase, scenarioNumber);
     }
 
-    private static void test2(String id)
-    {
-        String[] parts = id.split("(?<!" + "`" + ")" + ">", -1);
-        for(int i=0;i<parts.length;i++){
-            System.out.println(i+":"+parts[i]);
-        }
-    }
-    public static String escape(char splitor, char escape, String... values) {
-        StringBuilder escaped = new StringBuilder((values.length + 1) << 4);
-        // Do escape for every item in values
-        for (String value : values) {
-            if (escaped.length() > 0) {
-                escaped.append(splitor);
-            }
-
-            if (value.indexOf(splitor) == -1) {
-                escaped.append(value);
-                continue;
-            }
-            //将values中包含的特殊字符splitor转义成escape+splitor
-            // Do escape for current item
-            for (int i = 0, n = value.length(); i < n; i++) {
-                char ch = value.charAt(i);
-                if (ch == splitor) {
-                    escaped.append(escape);
-                }
-                escaped.append(ch);
-            }
-        }
-        return escaped.toString();
-    }
-
-    public static void test2(Object... strs)
-    {
-        for (Object str : strs) {
-            System.out.println(str);
-        }
-    }
 
     public static void main(String[] args) throws IOException
     {

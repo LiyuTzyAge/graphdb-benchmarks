@@ -46,8 +46,12 @@ import javax.annotation.Nullable;
 
 public class HugeGraphCoreMassiveInsertion extends InsertionBase<Integer,String> {
 
-    //需要是自定义taishi数据集edge的整数倍,9*n
-    // 否者batchCommit2时，刷新vertices2，导致id=null的vertex，id无法对应cache中的vertex
+    /*
+    NOTE:
+    因为实现原因，EDGE_BATCH_NUMBER需要是自定义taishi数据集edge的整数倍,9*n。
+    否者batchCommit2时，刷新vertices2，导致id=null的vertex，id无法与cache中vertex对应。
+    如不使用自定义数据集，则任意配置。
+     */
     private static final int EDGE_BATCH_NUMBER = 270;
 
     private ExecutorService pool = Executors.newFixedThreadPool(8);

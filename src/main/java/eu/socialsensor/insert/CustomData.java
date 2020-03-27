@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  *  @date: 2020/3/10
  *  @version: V1.0
  *
- * @Description:
+ * @Description: 自定义数据集加载
  */
 public class CustomData
 {

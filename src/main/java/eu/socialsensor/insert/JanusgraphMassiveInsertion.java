@@ -69,6 +69,9 @@ public class JanusgraphMassiveInsertion extends InsertionBase<Integer,Object>
 //        });
 //    }
 
+    /**
+     * Janusgraph-client批量导入不理想
+     */
     public void batchcommitEdge() {
         List<String> list = this.edgeList;
         this.edgeList = new ArrayList<>(EDGE_BATCH_NUMBER);
@@ -83,9 +86,7 @@ public class JanusgraphMassiveInsertion extends InsertionBase<Integer,Object>
 
     @Override
     protected void post() {
-//        if (this.vertexList.size() > 0) {
-//            batchcommitVertex();
-//        }
+
         if (this.edgeList.size() > 0) {
             batchcommitEdge();
         }

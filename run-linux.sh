@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CQLSH=/data12/graphd-benchmark/apache-cassandra-3.11.5/bin/cqlsh
-CASSANDRA_HOST=10.95.109.145
+CASSANDRA_HOST=localhost
 CASSANDRA_PORT=9042
 DROP='DROP KEYSPACE IF EXISTS titan;'
 CASSANDRA_CONNECT_TIMEOUT=30
@@ -14,7 +14,7 @@ jars=lib
 CP=""
 
 JAVA_OPTS=
-JAVA_OPTS="$JAVA_OPTS -Djava.rmi.server.hostname=10.95.109.145"
+JAVA_OPTS="$JAVA_OPTS -Djava.rmi.server.hostname=localhost"
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote"
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=9999"
 #JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.rmi.port=12345"
@@ -102,8 +102,7 @@ run() {
     fi
     # test
     jar_cp
-    java -server -Xms10g -Xmx10g ${JAVA_OPTS} -cp :${CP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Dlog4j.configuration=file:/${ROOT_DIR}/log4j.properties eu.socialsensor.main.GraphDatabaseBenchmark  ${CONF_FILE} > logs/$prefix.log 2>&1
-    #mvn test > logs/$prefix.log 2>&1
+    java -server -Xms60g -Xmx60g ${JAVA_OPTS} -cp :${CP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Dlog4j.configuration=file:/${ROOT_DIR}/log4j.properties eu.socialsensor.main.GraphDatabaseBenchmark  ${CONF_FILE} > logs/$prefix.log 2>&1
     if [ $? -eq 0 ]; then
         echo "$prefix executed successfully!"
     else

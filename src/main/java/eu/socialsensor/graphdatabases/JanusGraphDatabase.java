@@ -24,7 +24,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
  *  @date: 2020/3/3
  *  @version: V1.0
  *
- * @Description:
+ * @Description: 只测试过MissiveInsertion，SingleInsertion，Kout，Kneighbor
  */
 public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iterator<Edge>, Vertex, Edge>
 {
@@ -45,38 +45,31 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     //for test
     private JanusGraphDatabase()
     {
-        super(GraphDatabaseType.JANUSGRAPH, new File("E://test"));
-        serverConf = "E:/ideahouse/hugeGraph/benchmarks/graphdb-benchmarks/janusgraph.properties";
-        conf = "E:/ideahouse/hugeGraph/benchmarks/graphdb-benchmarks/janus-remote.properties";
+        super(GraphDatabaseType.JANUSGRAPH, new File("test"));
+        serverConf = "janusgraph.properties";
+        conf = "janus-remote.properties";
     }
 
     public static void main(String[] args) throws ConfigurationException
     {
-//        String inputPath = "E:\\ideahouse\\hugeGraph\\benchmarks\\graphdb-benchmarks\\input.properties";
-//        PropertiesConfiguration inputConf = new PropertiesConfiguration(new File(inputPath));
-//        BenchmarkConfiguration conf = new BenchmarkConfiguration(inputConf);
-//        JanusGraphDatabase database = new JanusGraphDatabase(conf, null);
-
         JanusGraphDatabase janus = new JanusGraphDatabase();
         janus.createGraphForMassiveLoad();
-        janus.massiveModeLoading(new File("E:\\test\\Email-Enron.txt"));
-//        janus.createGraphForSingleLoad();
-//        janus.singleModeLoading(new File("E:\\test\\Email-Enron.txt"),new File("E:\\test\\"),1);
-        Vertex vertex = janus.getVertex(0);
+        janus.massiveModeLoading(new File("Email-Enron.txt"));
 
+//        janus.singleModeLoading(new File("Email-Enron.txt"),new File("test"),1);
+        Vertex vertex = janus.getVertex(0);
 //        long kout = janus.kout(3, 0);
 //        long kneighbor = janus.kneighbor(3, 0);
 //        System.out.println("==============" + vertex);
 //        System.out.println("==============kout" + kout);
 //        System.out.println("==============keighbor" + kneighbor);
         janus.shutdown();
-        System.out.println("=======================");
     }
 
     private void buildGraphEnv(boolean clear)
     {
         if (clear) {
-            //无效
+            //无效，使用外部脚本清理clean-janus.sh
 //            clear();
         }
         client = new JanusGraphClient(conf);
@@ -120,7 +113,8 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     }
 
     /**
-     * 使用server模式清理，客户端没有清理功能
+     * 使用server模式清理，客户端不易清理
+     * clean-janus.sh
      */
     private void clear()
     {
@@ -206,7 +200,6 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
         shutdown();
     }
 
-    //以下查询待测
     @Override
     public Vertex getOtherVertexFromEdge(Edge edge, Vertex oneVertex)
     {
@@ -235,21 +228,19 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     @Override
     public Iterator<Edge> getAllEdges()
     {
-        //不要支持
+        //数据量过大
         return null;
     }
 
     @Override
     public Iterator<Edge> getNeighborsOfVertex(Vertex v)
     {
-        //不要支持
         return client.g().V(v).bothE(SIMILAR).next(LIMIT).iterator();
     }
 
     @Override
     public boolean edgeIteratorHasNext(Iterator<Edge> it)
     {
-        //不要支持
         return it.hasNext();
     }
 
@@ -310,12 +301,9 @@ public class JanusGraphDatabase extends GraphDatabaseBase<Iterator<Vertex>, Iter
     @Override
     public long kneighbor(int k, int node)
     {
-//        BulkSet value = client.getVertexTraversal(NODE,NODE_ID,node).emit().repeat(bothE(SIMILAR).dedup().store("edges").otherV()).times(k).dedup().aggregate("vertices").bothE().where(without("edges")).as("edge").otherV().where(within("vertices")).select("edge").store("edges").cap("vertices").size();
-//        BulkSet bs = (BulkSet) value;
         String query = String.format("g.V().has(\"nodeId\",%s).emit().repeat(bothE(\"%s\").dedup().store(\"edges\").otherV()).times(%d).dedup().aggregate(\"vertices\").bothE().where(without(\"edges\")).as(\"edge\").otherV().where(within(\"vertices\")).select(\"edge\").store(\"edges\").cap(\"vertices\").next().size()",
                 node, SIMILAR, k);
         List<Result> resultList = client.gremlinConsole(query);
-        System.out.println("======="+resultList);
         return resultList.get(0).getLong();
     }
 

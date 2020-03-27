@@ -34,7 +34,7 @@ import static eu.socialsensor.utils.JanusGraphUtils.*;
  *  @date: 2020/3/10
  *  @version: V1.0
  *
- * @Description: 处理态势数据
+ * @Description: 测试态势数据
  */
 public class TaiShiDataUtils implements Custom
 {

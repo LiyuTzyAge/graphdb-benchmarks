@@ -86,8 +86,6 @@
             <!--<artifactId>netty-all</artifactId>-->
             <!--<version>4.1.42.Final</version>-->
         <!--</dependency>-->
-
-
         <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -105,11 +103,6 @@
             <artifactId>gremlin-driver</artifactId>
             <version>3.4.3</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.apache.tinkerpop</groupId>-->
-            <!--<artifactId>gremlin-server</artifactId>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
         <!-- Janusgraph -->
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb -->
         <dependency>
@@ -163,6 +156,7 @@
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
             <version>5.0.73</version>
+            <!--Janusgraph user 7.5.11-->
             <!--<version>7.5.11</version>-->
         </dependency>
         <dependency>
@@ -284,11 +278,6 @@
             <!--<groupId>com.carrotsearch</groupId>-->
             <!--<artifactId>hppc</artifactId>-->
             <!--<version>0.4.2</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>com.sleepycat</groupId>-->
-            <!--<artifactId>je</artifactId>-->
-            <!--<version>5.0.73</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>net.java.dev.jna</groupId>

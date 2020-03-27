@@ -1,4 +1,4 @@
-CASSAN_DROP="/data12/graphd-benchmark/apache-cassandra-3.11.5/bin/cqlsh 10.95.109.145 9042"
+CASSAN_DROP="/data12/graphd-benchmark/apache-cassandra-3.11.5/bin/cqlsh localhost 9042"
 CASSAN_COMMAND="DROP KEYSPACE IF EXISTS janusgraph;"
 JANUS_DIR="/data12/graphd-benchmark/janusgraph-0.4.0-hadoop2"
 

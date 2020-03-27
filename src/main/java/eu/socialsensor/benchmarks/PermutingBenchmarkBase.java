@@ -69,7 +69,6 @@ public abstract class PermutingBenchmarkBase extends BenchmarkBase
         {
             //start
             totalTimeMap.put(type, System.currentTimeMillis());
-//            LOG.info("=======> "+this.getClass().getSimpleName()+" database "+type+" start "+System.currentTimeMillis());
             try {
                 benchmarkOne(type, cntPermutations);
                 //end
@@ -78,7 +77,6 @@ public abstract class PermutingBenchmarkBase extends BenchmarkBase
                 LOG.error("benchmark error !",e);
                 throw e;
             }
-//            LOG.info("=======> "+this.getClass().getSimpleName()+" database "+type+" cost "+(System.currentTimeMillis()-start));
         }
     }
 

@@ -84,7 +84,7 @@ public abstract class InsertionBase<T,E> implements Insertion
     /**
      * 加载自定义类型数据
      * 使用需自行实现
-     * 如果id=null，则没有id，无主键，顶点id自动分配
+     * 如果id=null，则没有id，无主键，系统自动分配顶点id
      * @param id
      * @param properties
      * @return
@@ -97,7 +97,6 @@ public abstract class InsertionBase<T,E> implements Insertion
     /**
      * 加载自定义类型数据
      * 使用需自行实现
-     * 如果properties=null,则没有属性写入
      * @param src
      * @param dest
      * @param properties

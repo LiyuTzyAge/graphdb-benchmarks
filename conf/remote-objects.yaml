@@ -1,5 +1,4 @@
-#hosts: [10.251.12.8]
-hosts: [10.95.109.145]
+hosts: [localhost]
 port: 28182
 serializer: { className: org.apache.tinkerpop.gremlin.driver.ser.GryoMessageSerializerV1d0, config: { ioRegistries: [org.janusgraph.graphdb.tinkerpop.JanusGraphIoRegistry]  }}
 connectionPool: { maxSize: 20, maxContentLength: 65535000 }

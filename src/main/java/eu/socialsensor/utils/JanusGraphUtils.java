@@ -57,6 +57,7 @@ public class JanusGraphUtils
             configuration.setProperty("storage.batch-loading", "false");
         }
         //全局配置，并且一旦初始化不可修改
+        //如果自定义id需要开启
         configuration.setProperty("graph.set-vertex-id","false");
         return JanusGraphFactory.open(configuration);
     }
@@ -110,7 +111,7 @@ public class JanusGraphUtils
     }
 
     /**
-     * 自定义id转换janusgraph-id，数值会发生变化
+     * 自定义id转换janusgraph-id，id数值会发生变化
      * 已测
      * @param graph
      * @param id
@@ -119,7 +120,7 @@ public class JanusGraphUtils
     public static long toVertexId(JanusGraph graph, Long id)
     {
         long tmp = id;
-        //janusgraph 顶点不许大于零
+        //janusgraph 顶点必须大于零
         if (tmp == 0) {
             long tt = Integer.MAX_VALUE;
             tmp = tt+1L;
@@ -231,7 +232,7 @@ public class JanusGraphUtils
 
     public static void main(String[] args) throws BackendException
     {
-        JanusGraph graph = JanusGraphUtils.createGraph(true, "E:\\ideahouse\\hugeGraph\\benchmarks\\graphdb-benchmarks\\janusgraph.properties");
+        JanusGraph graph = JanusGraphUtils.createGraph(true, "graphdb-benchmarks/conf/janusgraph.properties");
 //        Vertex vertex1 = graph.vertices(256L).next();
 //        shortestPath(graph, vertex1, 18944);
 //        System.exit(1);

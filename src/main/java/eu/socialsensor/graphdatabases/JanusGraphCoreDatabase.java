@@ -15,7 +15,6 @@ import eu.socialsensor.main.GraphDatabaseType;
 import org.apache.tinkerpop.gremlin.structure.util.CloseableIterator;
 import org.janusgraph.core.*;
 import org.janusgraph.core.schema.JanusGraphManagement;
-import org.janusgraph.core.util.JanusGraphCleanup;
 import org.janusgraph.diskstorage.BackendException;
 
 import java.io.File;
@@ -72,11 +71,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
     @Override
     public Vertex getVertex(Integer i)
     {
-        //通过id查询，需要测试验证 //TODO : 待验证
-//        return graph.vertices(i).next();
         return JanusGraphUtils.getVertex(this.graph, i.longValue());
-        //通过索引查询
-//        return graph.traversal().V().has(NODE_ID, i).next();
     }
 
     @Override
@@ -261,10 +256,7 @@ public class JanusGraphCoreDatabase extends GraphDatabaseBase<Iterator<Vertex>, 
         LOG.debug("##janusgraph :shortest path {} round, (from node: {}, to node: {})",
                 counter, fromNode.id(), node);
         counter++;
-//        Path path = g.V(fromNode.id()).repeat(out().simplePath()).until(has(NODE_ID, node)).path().limit(1).next();
-        //"g.V(%s).repeat(out().simplePath())" +
-        //                                     ".until(hasId(%s).or().loops().is(gte(3)" +
-        //                                     ")).hasId(%s).path().limit(1)"
+        //"g.V(%s).repeat(out().simplePath()).until(hasId(%s).or().loops().is(gte(5))).hasId(%s).path().limit(1)"
         Path path = graph.traversal().V(fromNode.id()).repeat(out().simplePath()).times(5).emit(has(NODE_ID, node)).path().limit(1).next();
         LOG.debug("##janusgraph :{}", path.toString());
     }

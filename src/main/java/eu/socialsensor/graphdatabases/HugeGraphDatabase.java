@@ -80,10 +80,13 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
         this.conf = config;
     }
 
+    /**
+     * for test
+     */
     private HugeGraphDatabase()
     {
-        super(GraphDatabaseType.HUGEGRAPH, new File("E://test"));
-        this.hugeClient = new HugeClient("http://10.95.109.145:18080",
+        super(GraphDatabaseType.HUGEGRAPH, new File("test"));
+        this.hugeClient = new HugeClient("http://localhost:18080",
                 "hugegraph",
                 CLIENT_TIMEOUT);
         this.gremlin = this.hugeClient.gremlin();
@@ -143,6 +146,7 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
 
     /**
      * TODO：待测试
+     * 数据量太大
      */
     @Override
     public void findAllNodeNeighbours()
@@ -159,6 +163,7 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
 
     /**
      * TODO：待测试
+     * 数据量太大
      */
     @Override
     public void findNodesOfAllEdges()
@@ -341,21 +346,18 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
     @Override
     public long kout(int k, int node)
     {
-//        String direct = "out" ;
-//        String query = String.format("g.V('%s').repeat(%s()).times(%s).count()",
-//                node, direct, k);
-//        ResultSet resultSet = this.gremlin.gremlin(query).execute();
-//        Iterator<Result> it = resultSet.iterator();
-//        return ((Number) it.next().getObject()).longValue();
+        //Kout-API
 //        return this.hugeClient.traverser().kout(node,Direction.OUT,SIMILAR, k,false).size();
+        //gremlin
         return kout2(k, node);
     }
 
     @Override
     public long kneighbor(int k, int node)
     {
-        //gremlin:g.V(1).emit().repeat(bothE().dedup().store("edges").otherV()).times(1).dedup().aggregate("vertices").bothE().where(without("edges")).as("edge").otherV().where(within("vertices")).select("edge").store("edges").cap("vertices").next()
+        //kneighbor-API
 //        return this.hugeClient.traverser().kneighbor(node, Direction.BOTH, SIMILAR, k).size();
+        //gremlin
         return kneighbor2(k, node);
     }
 
@@ -630,7 +632,7 @@ public class HugeGraphDatabase extends GraphDatabaseBase<
     }
     public static void test()
     {
-        HugeClient hugeClient = new HugeClient("http://10.95.109.145:18080",
+        HugeClient hugeClient = new HugeClient("http://localhost:18080",
                 "hugegraph",
                 CLIENT_TIMEOUT);
         Vertex v = getOrCreate(hugeClient, "0");

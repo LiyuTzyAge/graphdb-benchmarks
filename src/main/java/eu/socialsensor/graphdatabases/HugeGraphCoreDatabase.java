@@ -55,8 +55,6 @@ import com.baidu.hugegraph.type.define.Directions;
 import eu.socialsensor.main.BenchmarkConfiguration;
 import eu.socialsensor.main.GraphDatabaseType;
 
-import static org.apache.tinkerpop.gremlin.groovy.jsr223.dsl.credential.__.out;
-
 public class HugeGraphCoreDatabase extends GraphDatabaseBase<
                                            Iterator<Vertex>,
                                            Iterator<Edge>,
@@ -67,7 +65,6 @@ public class HugeGraphCoreDatabase extends GraphDatabaseBase<
 
     private HugeGraph graph = null;
     private GraphTraversalSource g = null;
-//    change static to instance by liyu04
 //    private static final String CONF = "hugegraph.properties";
     private final String conf ;
     private static boolean registered = false;

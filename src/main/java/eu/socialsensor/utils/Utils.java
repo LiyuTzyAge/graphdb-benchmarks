@@ -364,11 +364,4 @@ public class Utils
         return re;
     }
 
-    public static void main(String[] args)
-    {
-        Object[] arr = new Object[]{"aaa", "bbb"};
-        Object[] re = assemble(arr, "1111", "222");
-        System.out.println(Arrays.toString(re));
-
-    }
 }
